@@ -222,7 +222,12 @@ def parse_detail(item: dict, html: str) -> dict:
     if questions:
         top = max(questions, key=lambda x: x["yesRate"])
         focus = min(questions, key=lambda x: x["yesRate"])
-        result.update({"topItem": top, "focusItem": focus, "yesAverage": round(sum(x["yesRate"] for x in questions) / len(questions), 1)})
+        by_number = {question["number"]: question for question in questions}
+        result.update({
+            "topItem": top, "focusItem": focus,
+            "keyItems": {"safety": by_number.get(6), "trust": by_number.get(8), "respect": by_number.get(13), "responsiveness": by_number.get(16)},
+            "yesAverage": round(sum(x["yesRate"] for x in questions) / len(questions), 1),
+        })
     else:
         top = focus = None
     result["commentSummary"] = comment_summary(survey_comment, satisfaction)

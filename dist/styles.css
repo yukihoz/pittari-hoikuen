@@ -126,7 +126,7 @@ dialog h3 { margin-top: 26px; color: var(--navy); }
 .evaluation-heading h3 { margin: 2px 0 0; font-size: 19px; }
 .evaluation-kicker { margin: 0; color: #147180; font-size: 11px; font-weight: 900; letter-spacing: .06em; }
 .evaluation-heading a { flex: none; border-radius: 9px; padding: 8px 10px; color: #fff; background: #147180; font-size: 12px; font-weight: 850; text-decoration: none; }
-.evaluation-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 15px; }
+.evaluation-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 15px; }
 .evaluation-stats > div { border-radius: 11px; padding: 11px; background: #fff; box-shadow: inset 0 0 0 1px #dbecea; }
 .evaluation-stats span, .evaluation-stats small { display: block; color: var(--muted); font-size: 10px; }
 .evaluation-stats strong { display: block; margin: 2px 0; color: var(--navy-2); font-size: 20px; }

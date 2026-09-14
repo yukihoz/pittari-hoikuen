@@ -165,8 +165,9 @@
       <div class="evaluation-heading"><div><p class="evaluation-kicker">福ナビ・第三者評価</p><h3>利用者調査と評価講評</h3></div><a href="${safe(evaluation.url)}" target="_blank" rel="noreferrer">公式レポートを読む ↗</a></div>
       <div class="evaluation-stats">
         <div><span>総合満足</span><strong>${formatNum(evaluation.satisfaction, 1)}%</strong><small>「大変満足」＋「満足」</small></div>
-        <div><span>最も高い「はい」</span><strong>${formatNum(evaluation.topItem?.yesRate, 1)}%</strong><small>${safe(evaluation.topItem?.label || "共通設問")}</small></div>
-        <div><span>見学で確認したい項目</span><strong>${formatNum(evaluation.focusItem?.yesRate, 1)}%</strong><small>${safe(evaluation.focusItem?.label || "共通設問")}</small></div>
+        <div><span>子どもの気持ちを尊重</span><strong>${formatNum(evaluation.keyItems?.respect?.yesRate, 1)}%</strong><small>「はい」の割合</small></div>
+        <div><span>園と家庭の信頼関係</span><strong>${formatNum(evaluation.keyItems?.trust?.yesRate, 1)}%</strong><small>「はい」の割合</small></div>
+        <div><span>安全対策</span><strong>${formatNum(evaluation.keyItems?.safety?.yesRate, 1)}%</strong><small>「はい」の割合</small></div>
       </div>
       <div class="evaluation-bar" aria-label="総合満足 ${safe(evaluation.satisfaction)}%"><span style="width:${Math.max(0, Math.min(100, Number(evaluation.satisfaction) || 0))}%"></span></div>
       <div class="evaluation-comment"><strong>調査結果全体のコメント（要約）</strong><p>${safe(evaluation.commentSummary || "公式レポートで調査結果をご確認ください。")}</p></div>
@@ -231,8 +232,9 @@
       ${row("1人あたり延床面積", (x) => present(x.areaPerChild) ? `${formatNum(x.areaPerChild, 1)}㎡` : "—")}
       ${row("園庭", (x) => x.gardenLabel)}${row("駐輪スペース", (x) => x.bicycle)}${row("ベビーカー置場", (x) => x.stroller)}
       ${row("利用者の総合満足", (x) => { const evaluation = evaluationFor(x); return evaluation ? `${formatNum(evaluation.satisfaction, 1)}%` : "—"; })}
-      ${row("最も高い「はい」", (x) => { const evaluation = evaluationFor(x); return evaluation?.topItem ? `${evaluation.topItem.label} ${formatNum(evaluation.topItem.yesRate, 1)}%` : "—"; })}
-      ${row("見学で確認したい項目", (x) => { const evaluation = evaluationFor(x); return evaluation?.focusItem ? `${evaluation.focusItem.label} ${formatNum(evaluation.focusItem.yesRate, 1)}%` : "—"; })}
+      ${row("子どもの気持ちを尊重", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.respect ? `${formatNum(evaluation.keyItems.respect.yesRate, 1)}%` : "—"; })}
+      ${row("園と家庭の信頼関係", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.trust ? `${formatNum(evaluation.keyItems.trust.yesRate, 1)}%` : "—"; })}
+      ${row("安全対策", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.safety ? `${formatNum(evaluation.keyItems.safety.yesRate, 1)}%` : "—"; })}
       ${row("おむつ準備", (x) => x.diaperPrep)}${row("おむつ処分", (x) => x.diaperDispose)}${row("連絡アプリ", (x) => x.contactApp)}
       ${row("住所", (x) => x.address)}</tbody></table>`;
     els.compareDialog.showModal();
