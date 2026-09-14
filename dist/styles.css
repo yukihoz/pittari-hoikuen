@@ -132,6 +132,9 @@ dialog h3 { margin-top: 26px; color: var(--navy); }
 .evaluation-stats strong { display: block; margin: 2px 0; color: var(--navy-2); font-size: 20px; }
 .evaluation-bar { height: 7px; overflow: hidden; margin: 10px 0 16px; border-radius: 99px; background: #dce9e9; }
 .evaluation-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #23a8b8, #62c99a); }
+.evaluation-comment { margin-bottom: 12px; border-left: 4px solid #147180; border-radius: 4px 11px 11px 4px; padding: 12px 14px; background: #fff; box-shadow: inset 0 0 0 1px #dbecea; }
+.evaluation-comment strong { display: block; color: var(--navy); font-size: 13px; }
+.evaluation-comment p { margin: 5px 0 0; color: #354d5a; font-size: 13px; line-height: 1.7; }
 .evaluation-themes { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .evaluation-theme { border-radius: 12px; padding: 12px; }
 .evaluation-theme.good { background: #e7f5f3; }

@@ -55,6 +55,24 @@ THEMES = (
     ("保育内容・子どもの育ち", ("子ども", "遊び", "体験", "感性", "好奇心", "成長", "発達", "主体")),
 )
 
+QUESTION_LABELS = {
+    1: "発達に役立つ活動", 2: "興味・関心を引き出す活動", 3: "食事への配慮",
+    4: "自然・社会との関わり", 5: "保育時間変更への柔軟性", 6: "安全対策",
+    7: "行事日程への配慮", 8: "園と家庭の信頼関係", 9: "清掃・整理整頓",
+    10: "職員の接遇・態度", 11: "病気・けが時の対応", 12: "子ども同士のトラブル対応",
+    13: "子どもの気持ちの尊重", 14: "プライバシー保護", 15: "保育内容の説明",
+    16: "不満・要望への対応", 17: "外部相談窓口の案内",
+}
+
+COMMENT_TOPICS = (
+    ("職員の対応", ("職員", "先生", "保育士", "接遇")),
+    ("保育内容・活動", ("活動", "遊び", "行事", "体験", "制作")),
+    ("保護者との連携", ("相談", "連絡", "説明", "情報共有", "信頼関係")),
+    ("食事・食育", ("食事", "給食", "食育")),
+    ("安全・健康", ("安全", "けが", "体調", "健康", "衛生")),
+    ("戸外活動・園内環境", ("戸外", "散歩", "園庭", "施設", "設備", "清潔")),
+)
+
 SITE_NAME_ALIASES = {
     "インターナショナルアンジェリカ月島保育園": "アンジェリカ月島保育園",
     "中央区立堀留町保育園": "堀留町保育園",
@@ -115,6 +133,38 @@ def topic_labels(titles: list[str]) -> list[str]:
     return labels[:3]
 
 
+def questionnaire_results(soup: BeautifulSoup) -> list[dict]:
+    results = []
+    for item in soup.select("#user-survey .question-item"):
+        question = item.find("p")
+        graph = item.select_one(".graph-bar")
+        if not question or not graph:
+            continue
+        number = re.match(r"\s*(\d+)", clean(question.get_text(" ", strip=True)))
+        yes = re.search(r"はい\s*\d+名\s*\(([\d.]+)%\)", clean(graph.get_text(" ", strip=True)))
+        if number and yes:
+            index = int(number.group(1))
+            results.append({"number": index, "label": QUESTION_LABELS.get(index, f"設問{index}"), "yesRate": float(yes.group(1))})
+    return results
+
+
+def comment_summary(comment: str, satisfaction: Optional[float]) -> str:
+    sentences = [sentence for sentence in re.split(r"[。\n]", comment) if sentence]
+    concern_words = ("要望", "不満", "課題", "改善", "望む", "懸念", "低い", "向上", "一方")
+    concern_text = " ".join(sentence for sentence in sentences if any(word in sentence for word in concern_words))
+    positive_text = " ".join(sentence for sentence in sentences if not any(word in sentence for word in concern_words))
+    positive_topics = [label for label, words in COMMENT_TOPICS if any(word in positive_text for word in words)][:3]
+    concern_topics = [label for label, words in COMMENT_TOPICS if any(word in concern_text for word in words)][:3]
+    parts = []
+    if satisfaction is not None:
+        parts.append(f"利用者の総合満足は{satisfaction:g}%でした")
+    if positive_topics:
+        parts.append(f"全体コメントでは、{'、'.join(f'「{topic}」' for topic in positive_topics)}への肯定的な声が目立ちます")
+    if concern_topics:
+        parts.append(f"一方、{'、'.join(f'「{topic}」' for topic in concern_topics)}については要望や確認事項も挙げられています")
+    return "。".join(parts) + "。"
+
+
 def satisfaction_percent(text: str, response_count: Optional[int]) -> Optional[float]:
     counts = re.search(r"(?:「|<)大変満足(?:」|>)[^名]{0,12}?(\d+)名.*?(?:「|<)満足(?:」|>)[^名]{0,12}?(\d+)名", text)
     if counts and response_count:
@@ -152,6 +202,7 @@ def parse_detail(item: dict, html: str) -> dict:
     survey_comment = clean(survey_comment_node.get_text(" ", strip=True) if survey_comment_node else "")
     good_titles = [clean(x.get_text(" ", strip=True)) for x in soup.select("#summary .type-good .summary-item-title")]
     improve_titles = [clean(x.get_text(" ", strip=True)) for x in soup.select("#summary .type-improvement .summary-item-title")]
+    questions = questionnaire_results(soup)
     agency = ""
     evaluator = soup.select_one("#evaluator-info .info-card .data")
     if evaluator:
@@ -168,6 +219,13 @@ def parse_detail(item: dict, html: str) -> dict:
     satisfaction = satisfaction_percent(survey_comment, result.get("responses"))
     if satisfaction is not None and 0 <= satisfaction <= 100:
         result["satisfaction"] = satisfaction
+    if questions:
+        top = max(questions, key=lambda x: x["yesRate"])
+        focus = min(questions, key=lambda x: x["yesRate"])
+        result.update({"topItem": top, "focusItem": focus, "yesAverage": round(sum(x["yesRate"] for x in questions) / len(questions), 1)})
+    else:
+        top = focus = None
+    result["commentSummary"] = comment_summary(survey_comment, satisfaction)
     return result
 
 

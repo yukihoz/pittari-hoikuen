@@ -74,7 +74,7 @@
   function featureTags(item) {
     const tags = [];
     const evaluation = evaluationFor(item);
-    if (evaluation) tags.push([`第三者評価 ${evaluation.year}年度`, false, "evaluation"]);
+    if (evaluation) tags.push(["第三者評価あり", false, "evaluation"]);
     if (yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0) tags.push(["園庭", false]);
     if ((item.capacity?.["57d"] ?? 0) > 0) tags.push(["生後57日", true]);
     else if ((item.capacity?.["7m"] ?? 0) > 0) tags.push(["生後7か月", true]);
@@ -161,18 +161,18 @@
     const evaluation = evaluationFor(item);
     if (!evaluation) return "";
     const themes = (label, values, kind) => values?.length ? `<div class="evaluation-theme ${kind}"><strong>${safe(label)}</strong><div>${values.map((value) => `<span>${safe(value)}</span>`).join("")}</div></div>` : "";
-    const yearHistory = evaluation.years?.length ? evaluation.years.join("・") : evaluation.year;
     return `<section class="detail-section evaluation-section">
-      <div class="evaluation-heading"><div><p class="evaluation-kicker">福ナビ・最新の公開結果</p><h3>第三者評価 ${safe(evaluation.year)}年度</h3></div><a href="${safe(evaluation.url)}" target="_blank" rel="noreferrer">公式レポートを読む ↗</a></div>
+      <div class="evaluation-heading"><div><p class="evaluation-kicker">福ナビ・第三者評価</p><h3>利用者調査と評価講評</h3></div><a href="${safe(evaluation.url)}" target="_blank" rel="noreferrer">公式レポートを読む ↗</a></div>
       <div class="evaluation-stats">
         <div><span>総合満足</span><strong>${formatNum(evaluation.satisfaction, 1)}%</strong><small>「大変満足」＋「満足」</small></div>
-        <div><span>アンケート回答</span><strong>${formatNum(evaluation.responses)}/${formatNum(evaluation.households)}</strong><small>回答率 ${formatNum(evaluation.responseRate, 1)}%</small></div>
-        <div><span>公開年度</span><strong>${safe(evaluation.years?.length || 1)}回分</strong><small>${safe(yearHistory)}年度</small></div>
+        <div><span>最も高い「はい」</span><strong>${formatNum(evaluation.topItem?.yesRate, 1)}%</strong><small>${safe(evaluation.topItem?.label || "共通設問")}</small></div>
+        <div><span>見学で確認したい項目</span><strong>${formatNum(evaluation.focusItem?.yesRate, 1)}%</strong><small>${safe(evaluation.focusItem?.label || "共通設問")}</small></div>
       </div>
       <div class="evaluation-bar" aria-label="総合満足 ${safe(evaluation.satisfaction)}%"><span style="width:${Math.max(0, Math.min(100, Number(evaluation.satisfaction) || 0))}%"></span></div>
+      <div class="evaluation-comment"><strong>調査結果全体のコメント（要約）</strong><p>${safe(evaluation.commentSummary || "公式レポートで調査結果をご確認ください。")}</p></div>
       <div class="evaluation-themes">${themes("評価機関が挙げたよい点", evaluation.goodThemes, "good")}${themes("今後の改善テーマ", evaluation.improveThemes, "improve")}</div>
       <p class="evaluation-agency">評価機関：${safe(evaluation.agency || "福ナビ掲載の評価機関")}</p>
-      <p class="evaluation-note">満足度だけで順位づけせず、評価年度・回答数・講評の内容をあわせてご確認ください。テーマは講評を探しやすくするため、このサイトで分類しています。</p>
+      <p class="evaluation-note">「はい」の割合には無回答・非該当も含まれるため、低い数値がそのまま不満の割合を表すものではありません。要約とテーマ分類は、公式レポートを探しやすくするためこのサイトで整理しています。</p>
     </section>`;
   }
 
@@ -230,7 +230,9 @@
       ${row("0歳・生後7か月", (x) => present(x.capacity?.["7m"]) ? `${formatNum(x.capacity["7m"])}人` : "—")}
       ${row("1人あたり延床面積", (x) => present(x.areaPerChild) ? `${formatNum(x.areaPerChild, 1)}㎡` : "—")}
       ${row("園庭", (x) => x.gardenLabel)}${row("駐輪スペース", (x) => x.bicycle)}${row("ベビーカー置場", (x) => x.stroller)}
-      ${row("福ナビ第三者評価", (x) => { const evaluation = evaluationFor(x); return evaluation ? `${evaluation.year}年度 / 総合満足 ${formatNum(evaluation.satisfaction, 1)}% / 回答率 ${formatNum(evaluation.responseRate, 1)}%` : "—"; })}
+      ${row("利用者の総合満足", (x) => { const evaluation = evaluationFor(x); return evaluation ? `${formatNum(evaluation.satisfaction, 1)}%` : "—"; })}
+      ${row("最も高い「はい」", (x) => { const evaluation = evaluationFor(x); return evaluation?.topItem ? `${evaluation.topItem.label} ${formatNum(evaluation.topItem.yesRate, 1)}%` : "—"; })}
+      ${row("見学で確認したい項目", (x) => { const evaluation = evaluationFor(x); return evaluation?.focusItem ? `${evaluation.focusItem.label} ${formatNum(evaluation.focusItem.yesRate, 1)}%` : "—"; })}
       ${row("おむつ準備", (x) => x.diaperPrep)}${row("おむつ処分", (x) => x.diaperDispose)}${row("連絡アプリ", (x) => x.contactApp)}
       ${row("住所", (x) => x.address)}</tbody></table>`;
     els.compareDialog.showModal();
