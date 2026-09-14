@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="18" fill="#12395b"/>
+  <path d="M13 17h38v24c0 7-6 13-13 13H26c-7 0-13-6-13-13V17Z" fill="#ef615d"/>
+  <text x="32" y="43" text-anchor="middle" font-family="sans-serif" font-size="30" font-weight="900" fill="white">ぴ</text>
+</svg>
