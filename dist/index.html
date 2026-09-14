@@ -65,6 +65,11 @@
           <label class="check-row"><input type="checkbox" name="feature" value="contactApp" />連絡アプリあり</label>
           <label class="check-row"><input type="checkbox" name="feature" value="medical" />医療的ケア児受入あり</label>
         </fieldset>
+
+        <fieldset>
+          <legend>公開情報</legend>
+          <label class="check-row"><input type="checkbox" name="feature" value="evaluation" />福ナビ第三者評価あり</label>
+        </fieldset>
       </aside>
 
       <section class="results-panel" aria-labelledby="results-title">
@@ -101,6 +106,7 @@
           <button type="button" data-quick="garden">園庭あり</button>
           <button type="button" data-quick="diaper">おむつ準備が楽</button>
           <button type="button" data-quick="contactApp">連絡アプリ</button>
+          <button type="button" data-quick="evaluation">第三者評価あり</button>
         </div>
 
         <div id="active-filters" class="active-filters" aria-live="polite"></div>
@@ -141,7 +147,7 @@
       <ul class="source-list">
         <li><a href="https://www.city.chuo.lg.jp/a0021/kosodate/kosodate/hoikuen/hoiku/ninkahoiku/ninkahoikujo.html#cms1614F" target="_blank" rel="noreferrer">中央区 認可保育所 利用案内</a></li>
         <li><a href="https://www.city.chuo.lg.jp/kosodate/kosodate/hoikuen/hoiku/ninkahoiku/ninkahoikuensisetsuannai/index.html" target="_blank" rel="noreferrer">中央区 認可保育所 施設案内</a></li>
-        <li><a href="https://www.fukunavi.or.jp/" target="_blank" rel="noreferrer">とうきょう福祉ナビゲーション</a></li>
+        <li><a href="https://www.fukunavi.or.jp/fukunavi/controller?actionID=hyk&amp;cmd=hyklst&amp;S_MODE=area&amp;SVCDBR_CD=22&amp;MLT_AREA=13102&amp;MODE=multi&amp;STEP_SVCSBRCD=031" target="_blank" rel="noreferrer">福ナビ 中央区・認可保育所の第三者評価</a></li>
       </ul>
       <p class="credit">企画・データ整理：ほづみゆうき / Code for Chuo</p>
     </dialog>
@@ -166,6 +172,7 @@
     </template>
 
     <script src="data.js"></script>
+    <script src="evaluations.js"></script>
     <script src="app.js"></script>
   </body>
 </html>
