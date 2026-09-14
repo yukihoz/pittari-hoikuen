@@ -18,6 +18,10 @@
     compareContent: document.querySelector("#compare-content"),
     aboutDialog: document.querySelector("#about-dialog"),
     template: document.querySelector("#card-template"),
+    filterPanel: document.querySelector("#filter-panel"),
+    filterOpen: document.querySelector("[data-filter-open]"),
+    filterClose: document.querySelector(".mobile-filter-close"),
+    filterBackdrop: document.querySelector(".filter-backdrop"),
   };
 
   const normalized = (value) => String(value ?? "").normalize("NFKC").toLowerCase().replace(/\s+/g, "");
@@ -26,7 +30,7 @@
   const safe = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
   const formatNum = (value, digits = 0) => present(value) ? Number(value).toLocaleString("ja-JP", { maximumFractionDigits: digits }) : "—";
   const formatDate = (value) => present(value) && /^\d{4}/.test(String(value)) ? `${String(value).slice(0, 4)}年${Number(String(value).slice(5, 7)) || ""}月` : "—";
-  const areaColor = (area) => area === "京橋" ? "#ef615d" : area === "月島" ? "#25a8b8" : "#12395b";
+  const areaColor = (area) => area === "京橋" ? "#b88932" : area === "月島" ? "#6f8060" : "#8b7251";
   const ageLabels = { "57d": "生後57日", "7m": "生後7か月", age1: "1歳児", age2: "2歳児", age3: "3歳児", age4: "4歳児", age5: "5歳児" };
   const evaluationsByName = new Map(evaluations.map((evaluation) => [evaluation.siteKey || evaluation.key, evaluation]));
   const evaluationFor = (item) => evaluationsByName.get(normalized(item.name));
@@ -67,22 +71,24 @@
     return filtered;
   }
 
-  function metric(label, value) {
-    return `<div class="metric"><span>${safe(label)}</span><strong>${safe(value)}</strong></div>`;
+  function metric(icon, label, value) {
+    return `<div class="metric"><span class="metric-label"><span class="material-symbols-rounded metric-icon">${icon}</span>${safe(label)}</span><strong>${safe(value)}</strong></div>`;
   }
 
   function featureTags(item) {
     const tags = [];
     const evaluation = evaluationFor(item);
-    if (evaluation) tags.push(["第三者評価あり", false, "evaluation"]);
-    if (yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0) tags.push(["園庭", false]);
-    if ((item.capacity?.["57d"] ?? 0) > 0) tags.push(["生後57日", true]);
-    else if ((item.capacity?.["7m"] ?? 0) > 0) tags.push(["生後7か月", true]);
-    if (yes(item.bicycle)) tags.push(["駐輪", false]);
-    if (yes(item.stroller)) tags.push(["ベビーカー", false]);
-    if (/園|サブスク/.test(item.diaperPrep ?? "") && !/保護者\s*$/.test(item.diaperPrep ?? "")) tags.push(["おむつ準備負担少", true]);
-    if (yes(item.contactApp)) tags.push(["連絡アプリ", false]);
-    return tags.slice(0, 5).map(([label, accent, kind]) => `<span class="feature-tag${accent ? " accent" : ""}${kind ? ` ${kind}` : ""}">${safe(label)}</span>`).join("");
+    if (evaluation) tags.push(["第三者評価あり", "rate_review", false, "evaluation"]);
+    if (yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0) tags.push(["園庭", "yard", false]);
+    if ((item.capacity?.["57d"] ?? 0) > 0) tags.push(["生後57日", "cake", true]);
+    else if ((item.capacity?.["7m"] ?? 0) > 0) tags.push(["生後7か月", "cake", true]);
+    if (yes(item.bicycle)) tags.push(["駐輪", "pedal_bike", false]);
+    if (yes(item.stroller)) tags.push(["ベビーカー", "stroller", false]);
+    if (/園|サブスク/.test(item.diaperPrep ?? "") && !/保護者\s*$/.test(item.diaperPrep ?? "")) tags.push(["おむつ楽", "baby_changing_station", true]);
+    if (yes(item.contactApp)) tags.push(["連絡アプリ", "smartphone", false]);
+    return tags.slice(0, 5).map(([label, icon, accent, kind]) =>
+      `<span class="feature-tag${accent ? " accent" : ""}${kind ? ` ${kind}` : ""}"><span class="material-symbols-rounded tag-icon">${icon}</span>${safe(label)}</span>`
+    ).join("");
   }
 
   function renderCard(item) {
@@ -92,12 +98,14 @@
     node.querySelector(".area-badge").textContent = item.area || "中央区";
     node.querySelector(".category-label").textContent = item.type || item.category;
     node.querySelector(".nursery-name").textContent = item.name;
-    node.querySelector(".nursery-operator").textContent = item.operator || "運営者情報なし";
-    node.querySelector(".nursery-address").textContent = item.address || "住所情報なし";
+    const opText = node.querySelector(".operator-text");
+    if (opText) opText.textContent = item.operator || "運営者情報なし";
+    const addrText = node.querySelector(".address-text");
+    if (addrText) addrText.textContent = item.address || "住所情報なし";
     node.querySelector(".metric-grid").innerHTML = [
-      metric("定員", present(item.capacity?.total) ? `${formatNum(item.capacity.total)}人` : "—"),
-      metric("1人あたり面積", present(item.areaPerChild) ? `${formatNum(item.areaPerChild, 1)}㎡` : "—"),
-      metric("開設", formatDate(item.opened)),
+      metric("groups", "定員", present(item.capacity?.total) ? `${formatNum(item.capacity.total)}人` : "—"),
+      metric("square_foot", "1人あたり面積", present(item.areaPerChild) ? `${formatNum(item.areaPerChild, 1)}㎡` : "—"),
+      metric("event", "開設", formatDate(item.opened)),
     ].join("");
     node.querySelector(".feature-tags").innerHTML = featureTags(item);
     const open = () => showDetail(item);
@@ -153,27 +161,72 @@
     render();
   }
 
-  function detailCell(label, value) {
-    return `<div class="detail-cell"><span>${safe(label)}</span><strong>${safe(present(value) ? value : "—")}</strong></div>`;
+  const filterMedia = window.matchMedia("(max-width: 760px)");
+  function setFilterOpen(open, returnFocus = true) {
+    const wasOpen = els.filterPanel.classList.contains("is-open");
+    const shouldOpen = filterMedia.matches && open;
+    els.filterPanel.classList.toggle("is-open", shouldOpen);
+    els.filterBackdrop.classList.toggle("is-open", shouldOpen);
+    document.body.classList.toggle("filter-open", shouldOpen);
+    els.filterOpen.setAttribute("aria-expanded", String(shouldOpen));
+    if (filterMedia.matches) els.filterPanel.setAttribute("aria-hidden", String(!shouldOpen));
+    else els.filterPanel.removeAttribute("aria-hidden");
+    if (shouldOpen) requestAnimationFrame(() => els.filterClose.focus());
+    else if (wasOpen && returnFocus) els.filterOpen.focus();
+  }
+
+  function detailCell(label, value, icon) {
+    const iconHtml = icon ? `<span class="material-symbols-rounded cell-icon">${icon}</span>` : "";
+    return `<div class="detail-cell"><span class="cell-label">${iconHtml}${safe(label)}</span><strong>${safe(present(value) ? value : "—")}</strong></div>`;
   }
 
   function evaluationSection(item) {
     const evaluation = evaluationFor(item);
     if (!evaluation) return "";
-    const themes = (label, values, kind) => values?.length ? `<div class="evaluation-theme ${kind}"><strong>${safe(label)}</strong><div>${values.map((value) => `<span>${safe(value)}</span>`).join("")}</div></div>` : "";
+    const themes = (label, values, kind, icon) => values?.length ? `<div class="evaluation-theme ${kind}"><strong><span class="material-symbols-rounded icon-inline-sm">${icon}</span>${safe(label)}</strong><div>${values.map((value) => `<span>${safe(value)}</span>`).join("")}</div></div>` : "";
     return `<section class="detail-section evaluation-section">
-      <div class="evaluation-heading"><div><p class="evaluation-kicker">福ナビ・第三者評価</p><h3>利用者調査と評価講評</h3></div><a href="${safe(evaluation.url)}" target="_blank" rel="noreferrer">公式レポートを読む ↗</a></div>
+      <div class="evaluation-heading">
+        <div>
+          <p class="evaluation-kicker"><span class="material-symbols-rounded icon-inline">rate_review</span>福ナビ・第三者評価</p>
+          <h3>利用者調査と評価講評</h3>
+        </div>
+        <a href="${safe(evaluation.url)}" target="_blank" rel="noreferrer">
+          <span class="material-symbols-rounded">open_in_new</span>公式レポートを読む
+        </a>
+      </div>
       <div class="evaluation-stats">
-        <div><span>総合満足</span><strong>${formatNum(evaluation.satisfaction, 1)}%</strong><small>「大変満足」＋「満足」</small></div>
-        <div><span>子どもの気持ちを尊重</span><strong>${formatNum(evaluation.keyItems?.respect?.yesRate, 1)}%</strong><small>「はい」の割合</small></div>
-        <div><span>園と家庭の信頼関係</span><strong>${formatNum(evaluation.keyItems?.trust?.yesRate, 1)}%</strong><small>「はい」の割合</small></div>
-        <div><span>安全対策</span><strong>${formatNum(evaluation.keyItems?.safety?.yesRate, 1)}%</strong><small>「はい」の割合</small></div>
+        <div>
+          <span><span class="material-symbols-rounded icon-inline-sm">sentiment_very_satisfied</span>総合満足</span>
+          <strong>${formatNum(evaluation.satisfaction, 1)}%</strong>
+          <small>「大変満足」＋「満足」</small>
+        </div>
+        <div>
+          <span><span class="material-symbols-rounded icon-inline-sm">favorite</span>子どもの気持ちを尊重</span>
+          <strong>${formatNum(evaluation.keyItems?.respect?.yesRate, 1)}%</strong>
+          <small>「はい」の割合</small>
+        </div>
+        <div>
+          <span><span class="material-symbols-rounded icon-inline-sm">handshake</span>園と家庭の信頼関係</span>
+          <strong>${formatNum(evaluation.keyItems?.trust?.yesRate, 1)}%</strong>
+          <small>「はい」の割合</small>
+        </div>
+        <div>
+          <span><span class="material-symbols-rounded icon-inline-sm">verified_user</span>安全対策</span>
+          <strong>${formatNum(evaluation.keyItems?.safety?.yesRate, 1)}%</strong>
+          <small>「はい」の割合</small>
+        </div>
       </div>
       <div class="evaluation-bar" aria-label="総合満足 ${safe(evaluation.satisfaction)}%"><span style="width:${Math.max(0, Math.min(100, Number(evaluation.satisfaction) || 0))}%"></span></div>
-      <div class="evaluation-comment"><strong>調査結果全体のコメント（要約）</strong><p>${safe(evaluation.commentSummary || "公式レポートで調査結果をご確認ください。")}</p></div>
-      <div class="evaluation-themes">${themes("評価機関が挙げたよい点", evaluation.goodThemes, "good")}${themes("今後の改善テーマ", evaluation.improveThemes, "improve")}</div>
-      <p class="evaluation-agency">評価機関：${safe(evaluation.agency || "福ナビ掲載の評価機関")}</p>
-      <p class="evaluation-note">「はい」の割合には無回答・非該当も含まれるため、低い数値がそのまま不満の割合を表すものではありません。要約とテーマ分類は、公式レポートを探しやすくするためこのサイトで整理しています。</p>
+      <div class="evaluation-comment">
+        <strong><span class="material-symbols-rounded icon-inline-sm">comment</span>調査結果全体のコメント（要約）</strong>
+        <p>${safe(evaluation.commentSummary || "公式レポートで調査結果をご確認ください。")}</p>
+      </div>
+      <div class="evaluation-themes">
+        ${themes("評価機関が挙げたよい点", evaluation.goodThemes, "good", "thumb_up")}
+        ${themes("今後の改善テーマ", evaluation.improveThemes, "improve", "lightbulb")}
+      </div>
+      <p class="evaluation-agency"><span class="material-symbols-rounded icon-inline-sm">business</span>評価機関：${safe(evaluation.agency || "福ナビ掲載の評価機関")}</p>
+      <p class="evaluation-note">※「はい」の割合には無回答・非該当も含まれるため、低い数値がそのまま不満の割合を表すものではありません。要約とテーマ分類は、公式レポートを探しやすくするためこのサイトで整理しています。</p>
     </section>`;
   }
 
@@ -181,31 +234,63 @@
     const evaluation = evaluationFor(item);
     const mapUrl = present(item.lat) && present(item.lng) ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.lat},${item.lng}`)}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.address || item.name)}`;
     const ages = [["57d", "0歳・57日"], ["7m", "0歳・7か月"], ["age1", "1歳"], ["age2", "2歳"], ["age3", "3歳"], ["age4", "4歳"], ["age5", "5歳"]];
-    const capacity = ages.map(([key, label]) => detailCell(label, present(item.capacity?.[key]) ? `${formatNum(item.capacity[key])}人` : "—")).join("");
+    const capacity = ages.map(([key, label]) => detailCell(label, present(item.capacity?.[key]) ? `${formatNum(item.capacity[key])}人` : "—", "cake")).join("");
     const daily = [
-      ["駐輪スペース", item.bicycle], ["ベビーカー置場", item.stroller], ["おむつの準備", item.diaperPrep], ["おむつの処分", item.diaperDispose],
-      ["布団カバー準備", item.beddingPrep], ["付け外し", item.beddingAttach], ["洗濯", item.beddingWash], ["連絡アプリ", item.contactApp], ["制服", item.uniform],
-    ].map(([label, value]) => detailCell(label, value)).join("");
-    const links = [`<a href="${mapUrl}" target="_blank" rel="noreferrer">地図で見る</a>`];
-    if (present(item.website) && /^https?:/.test(item.website)) links.push(`<a href="${safe(item.website)}" target="_blank" rel="noreferrer">施設サイト</a>`);
-    if (evaluation) links.push(`<a href="${safe(evaluation.url)}" target="_blank" rel="noreferrer">第三者評価</a>`);
-    else if (present(item.evaluation) && /^https?:/.test(item.evaluation)) links.push(`<a href="${safe(item.evaluation)}" target="_blank" rel="noreferrer">第三者評価</a>`);
+      ["駐輪スペース", item.bicycle, "pedal_bike"],
+      ["ベビーカー置場", item.stroller, "stroller"],
+      ["おむつの準備", item.diaperPrep, "baby_changing_station"],
+      ["おむつの処分", item.diaperDispose, "delete_outline"],
+      ["布団カバー準備", item.beddingPrep, "bed"],
+      ["付け外し", item.beddingAttach, "build"],
+      ["洗濯", item.beddingWash, "local_laundry_service"],
+      ["連絡アプリ", item.contactApp, "smartphone"],
+      ["制服", item.uniform, "checkroom"],
+    ].map(([label, value, icon]) => detailCell(label, value, icon)).join("");
+    const links = [`<a href="${mapUrl}" target="_blank" rel="noreferrer"><span class="material-symbols-rounded">map</span>地図で見る</a>`];
+    if (present(item.website) && /^https?:/.test(item.website)) links.push(`<a href="${safe(item.website)}" target="_blank" rel="noreferrer"><span class="material-symbols-rounded">public</span>施設サイト</a>`);
+    if (evaluation) links.push(`<a href="${safe(evaluation.url)}" target="_blank" rel="noreferrer"><span class="material-symbols-rounded">rate_review</span>第三者評価</a>`);
+    else if (present(item.evaluation) && /^https?:/.test(item.evaluation)) links.push(`<a href="${safe(item.evaluation)}" target="_blank" rel="noreferrer"><span class="material-symbols-rounded">rate_review</span>第三者評価</a>`);
     els.detailContent.innerHTML = `
-      <div class="detail-hero"><div class="dialog-kicker">${safe(item.area || "中央区")} / ${safe(item.type || item.category)}</div><h2>${safe(item.name)}</h2><p class="detail-subtitle">${safe(item.operator || "")}<br>${safe(item.address || "住所情報なし")}</p><div class="detail-links">${links.join("")}</div></div>
-      <section class="detail-section"><h3>定員</h3><div class="detail-grid">${capacity}</div></section>
-      <section class="detail-section"><h3>施設・職員体制</h3><div class="detail-grid">
-        ${detailCell("定員合計", present(item.capacity?.total) ? `${formatNum(item.capacity.total)}人` : "—")}
-        ${detailCell("延床面積", present(item.floorArea) ? `${formatNum(item.floorArea, 1)}㎡` : "—")}
-        ${detailCell("1人あたり延床面積", present(item.areaPerChild) ? `${formatNum(item.areaPerChild, 1)}㎡` : "—")}
-        ${detailCell("園庭", item.gardenLabel)}${detailCell("園庭面積", present(item.gardenArea) ? `${formatNum(item.gardenArea, 1)}㎡` : "—")}
-        ${detailCell("保育士数", present(item.nurseryTeachers) ? `${formatNum(item.nurseryTeachers, 1)}人` : "—")}
-        ${detailCell("職員数", present(item.totalStaff) ? `${formatNum(item.totalStaff, 1)}人` : "—")}
-        ${detailCell("医療的ケア児", item.medicalCare)}${detailCell("エレベーター", item.elevator)}
-      </div></section>
+      <div class="detail-hero">
+        <div class="dialog-kicker"><span class="material-symbols-rounded icon-inline">apartment</span>${safe(item.area || "中央区")} / ${safe(item.type || item.category)}</div>
+        <h2>${safe(item.name)}</h2>
+        <p class="detail-subtitle">${safe(item.operator || "")}<br><span class="material-symbols-rounded icon-inline-sm">location_on</span>${safe(item.address || "住所情報なし")}</p>
+        <div class="detail-links">${links.join("")}</div>
+      </div>
+      <section class="detail-section">
+        <h3><span class="material-symbols-rounded icon-inline">cake</span>各年齢の定員</h3>
+        <div class="detail-grid">${capacity}</div>
+      </section>
+      <section class="detail-section">
+        <h3><span class="material-symbols-rounded icon-inline">apartment</span>施設・職員体制</h3>
+        <div class="detail-grid">
+          ${detailCell("定員合計", present(item.capacity?.total) ? `${formatNum(item.capacity.total)}人` : "—", "groups")}
+          ${detailCell("延床面積", present(item.floorArea) ? `${formatNum(item.floorArea, 1)}㎡` : "—", "square_foot")}
+          ${detailCell("1人あたり延床面積", present(item.areaPerChild) ? `${formatNum(item.areaPerChild, 1)}㎡` : "—", "straighten")}
+          ${detailCell("園庭", item.gardenLabel, "yard")}
+          ${detailCell("園庭面積", present(item.gardenArea) ? `${formatNum(item.gardenArea, 1)}㎡` : "—", "park")}
+          ${detailCell("保育士数", present(item.nurseryTeachers) ? `${formatNum(item.nurseryTeachers, 1)}人` : "—", "badge")}
+          ${detailCell("職員数", present(item.totalStaff) ? `${formatNum(item.totalStaff, 1)}人` : "—", "support_agent")}
+          ${detailCell("医療的ケア児", item.medicalCare, "medical_services")}
+          ${detailCell("エレベーター", item.elevator, "elevator")}
+        </div>
+      </section>
       ${evaluationSection(item)}
-      ${item.category === "認可保育園・こども園" ? `<section class="detail-section"><h3>毎日の準備・設備</h3><div class="detail-grid">${daily}</div></section>` : ""}
-      ${present(item.inspectionDetail) ? `<section class="detail-section"><h3>指導検査</h3><div class="note">${safe(item.inspectionDetail)}</div></section>` : ""}
-      ${present(item.note) ? `<section class="detail-section"><h3>備考</h3><div class="note">${safe(item.note)}</div></section>` : ""}`;
+      ${item.category === "認可保育園・こども園" ? `
+      <section class="detail-section">
+        <h3><span class="material-symbols-rounded icon-inline">checklist</span>毎日の準備・設備</h3>
+        <div class="detail-grid">${daily}</div>
+      </section>` : ""}
+      ${present(item.inspectionDetail) ? `
+      <section class="detail-section">
+        <h3><span class="material-symbols-rounded icon-inline">policy</span>指導検査</h3>
+        <div class="note">${safe(item.inspectionDetail)}</div>
+      </section>` : ""}
+      ${present(item.note) ? `
+      <section class="detail-section">
+        <h3><span class="material-symbols-rounded icon-inline">notes</span>備考</h3>
+        <div class="note">${safe(item.note)}</div>
+      </section>` : ""}`;
     els.detailDialog.showModal();
   }
 
@@ -224,19 +309,25 @@
 
   function showCompare() {
     const items = [...state.compare].map((id) => data.find((item) => item.id === id)).filter(Boolean);
-    const row = (label, getValue) => `<tr><th scope="row">${safe(label)}</th>${items.map((item) => `<td>${safe(getValue(item) ?? "—")}</td>`).join("")}</tr>`;
+    const row = (label, icon, getValue) => `<tr><th scope="row"><span class="table-th-label">${icon ? `<span class="material-symbols-rounded table-icon">${icon}</span>` : ""}${safe(label)}</span></th>${items.map((item) => `<td>${safe(getValue(item) ?? "—")}</td>`).join("")}</tr>`;
     els.compareContent.innerHTML = `<table class="compare-table"><thead><tr><th>比較項目</th>${items.map((item) => `<th>${safe(item.name)}</th>`).join("")}</tr></thead><tbody>
-      ${row("エリア", (x) => x.area)}${row("種別", (x) => x.type)}${row("定員合計", (x) => present(x.capacity?.total) ? `${formatNum(x.capacity.total)}人` : "—")}
-      ${row("0歳・生後57日", (x) => present(x.capacity?.["57d"]) ? `${formatNum(x.capacity["57d"])}人` : "—")}
-      ${row("0歳・生後7か月", (x) => present(x.capacity?.["7m"]) ? `${formatNum(x.capacity["7m"])}人` : "—")}
-      ${row("1人あたり延床面積", (x) => present(x.areaPerChild) ? `${formatNum(x.areaPerChild, 1)}㎡` : "—")}
-      ${row("園庭", (x) => x.gardenLabel)}${row("駐輪スペース", (x) => x.bicycle)}${row("ベビーカー置場", (x) => x.stroller)}
-      ${row("利用者の総合満足", (x) => { const evaluation = evaluationFor(x); return evaluation ? `${formatNum(evaluation.satisfaction, 1)}%` : "—"; })}
-      ${row("子どもの気持ちを尊重", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.respect ? `${formatNum(evaluation.keyItems.respect.yesRate, 1)}%` : "—"; })}
-      ${row("園と家庭の信頼関係", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.trust ? `${formatNum(evaluation.keyItems.trust.yesRate, 1)}%` : "—"; })}
-      ${row("安全対策", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.safety ? `${formatNum(evaluation.keyItems.safety.yesRate, 1)}%` : "—"; })}
-      ${row("おむつ準備", (x) => x.diaperPrep)}${row("おむつ処分", (x) => x.diaperDispose)}${row("連絡アプリ", (x) => x.contactApp)}
-      ${row("住所", (x) => x.address)}</tbody></table>`;
+      ${row("エリア", "location_on", (x) => x.area)}
+      ${row("種別", "category", (x) => x.type)}
+      ${row("定員合計", "groups", (x) => present(x.capacity?.total) ? `${formatNum(x.capacity.total)}人` : "—")}
+      ${row("0歳・生後57日", "cake", (x) => present(x.capacity?.["57d"]) ? `${formatNum(x.capacity["57d"])}人` : "—")}
+      ${row("0歳・生後7か月", "cake", (x) => present(x.capacity?.["7m"]) ? `${formatNum(x.capacity["7m"])}人` : "—")}
+      ${row("1人あたり延床面積", "straighten", (x) => present(x.areaPerChild) ? `${formatNum(x.areaPerChild, 1)}㎡` : "—")}
+      ${row("園庭", "yard", (x) => x.gardenLabel)}
+      ${row("駐輪スペース", "pedal_bike", (x) => x.bicycle)}
+      ${row("ベビーカー置場", "stroller", (x) => x.stroller)}
+      ${row("利用者の総合満足", "sentiment_very_satisfied", (x) => { const evaluation = evaluationFor(x); return evaluation ? `${formatNum(evaluation.satisfaction, 1)}%` : "—"; })}
+      ${row("子どもの気持ちを尊重", "favorite", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.respect ? `${formatNum(evaluation.keyItems.respect.yesRate, 1)}%` : "—"; })}
+      ${row("園と家庭の信頼関係", "handshake", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.trust ? `${formatNum(evaluation.keyItems.trust.yesRate, 1)}%` : "—"; })}
+      ${row("安全対策", "verified_user", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.safety ? `${formatNum(evaluation.keyItems.safety.yesRate, 1)}%` : "—"; })}
+      ${row("おむつ準備", "baby_changing_station", (x) => x.diaperPrep)}
+      ${row("おむつ処分", "delete_outline", (x) => x.diaperDispose)}
+      ${row("連絡アプリ", "smartphone", (x) => x.contactApp)}
+      ${row("住所", "place", (x) => x.address)}</tbody></table>`;
     els.compareDialog.showModal();
   }
 
@@ -303,10 +394,15 @@
     render();
   }));
   document.querySelectorAll("[data-reset]").forEach((button) => button.addEventListener("click", reset));
+  els.filterOpen.addEventListener("click", () => setFilterOpen(true));
+  document.querySelectorAll("[data-filter-close]").forEach((button) => button.addEventListener("click", () => setFilterOpen(false)));
+  document.addEventListener("keydown", (event) => { if (event.key === "Escape" && els.filterPanel.classList.contains("is-open")) setFilterOpen(false); });
+  filterMedia.addEventListener?.("change", () => setFilterOpen(false, false));
   document.querySelectorAll("[data-open-about]").forEach((button) => button.addEventListener("click", () => els.aboutDialog.showModal()));
   document.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", () => button.closest("dialog").close()));
   document.querySelectorAll("dialog").forEach((dialog) => dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); }));
   document.querySelector("#open-compare").addEventListener("click", showCompare);
   registerWebMcp();
+  setFilterOpen(false, false);
   render();
 })();
