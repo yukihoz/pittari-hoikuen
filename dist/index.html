@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@400;500;700;800;900&family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="styles.css?v=20260915l" />
+    <link rel="stylesheet" href="styles.css?v=20260915m" />
   </head>
   <body>
     <header class="site-header">
@@ -62,15 +62,7 @@
           <label class="check-row difficulty-toggle"><input type="checkbox" data-difficulty-filter />入りやすい・普通のみ表示</label>
           <details class="difficulty-help">
             <summary>判定方法を見る</summary>
-            <div>
-              <p>前回（2026年2月）の利用調整結果をもとにした目安です。ご自身の点数と各園の最低指数を比べ、40点で同点の場合は最終内定順位も加味します。</p>
-              <ul>
-                <li><strong>入りやすい：</strong>最低指数を上回る、3年連続で空き枠あり、または40点でH〜P位まで内定。</li>
-                <li><strong>普通：</strong>最低指数と同点、または40点でD〜G位まで内定。</li>
-                <li><strong>入りにくい：</strong>最低指数未満、または40点でA〜C位までに内定。</li>
-              </ul>
-              <p>同じ40点でも、居住歴や兄弟在園などの同点順位により結果が分かれます。実際の選考結果を保証するものではありません。</p>
-            </div>
+            <div data-difficulty-explanation></div>
           </details>
         </fieldset>
 
@@ -152,15 +144,7 @@
             <label class="check-row difficulty-toggle"><input type="checkbox" data-difficulty-filter />入りやすい・普通のみ表示</label>
             <details class="difficulty-help">
               <summary>判定方法を見る</summary>
-              <div>
-                <p>前回（2026年2月）の利用調整結果をもとにした目安です。点数と最低指数を比べ、40点で同点の場合は最終内定順位も加味します。</p>
-                <ul>
-                  <li><strong>入りやすい：</strong>指数を上回る、3年連続空き、または40点でH〜P位。</li>
-                  <li><strong>普通：</strong>指数と同点、または40点でD〜G位。</li>
-                  <li><strong>入りにくい：</strong>指数未満、または40点でA〜C位。</li>
-                </ul>
-                <p>毎年の申込倍率や募集定員で変動するため、目安としてご利用ください。</p>
-              </div>
+              <div data-difficulty-explanation></div>
             </details>
           </fieldset>
           <fieldset class="top-filter-group">
@@ -332,6 +316,6 @@
     <script src="data.js?v=20260915e"></script>
     <script src="admission-data.js?v=20260915a"></script>
     <script src="evaluations.js?v=20260914c"></script>
-    <script src="app.js?v=20260915j"></script>
+    <script src="app.js?v=20260915k"></script>
   </body>
 </html>

@@ -406,6 +406,52 @@ legend {
 .difficulty-help p:last-child { margin-bottom: 0; }
 .difficulty-help ul { margin: 0 0 8px; padding-left: 18px; }
 .difficulty-help li + li { margin-top: 5px; }
+.difficulty-explanation h4 {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 2px 0 10px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.difficulty-explanation h4 .material-symbols-rounded {
+  flex: none;
+  color: #c29400;
+  font-size: 18px;
+}
+.difficulty-rule {
+  margin: 8px 0;
+  padding: 8px 9px;
+  border: 1px solid;
+  border-radius: 10px;
+}
+.difficulty-rule h5 {
+  display: flex;
+  align-items: center;
+  margin: 0 0 5px;
+  font-size: 12px;
+}
+.difficulty-rule ul { margin-bottom: 0; }
+.rule-easy { color: #2e7d32; background: #e8f5e9; border-color: #a5d6a7; }
+.rule-normal { color: #8a5a00; background: #fff9c4; border-color: #e1b300; }
+.rule-hard { color: #c62828; background: #ffebee; border-color: #ffcdd2; }
+.difficulty-question {
+  margin: 13px 0 5px;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.5;
+}
+.difficulty-explanation hr {
+  margin: 13px 0;
+  border: 0;
+  border-top: 1px solid #ddd3bd;
+}
+.difficulty-explanation .difficulty-note {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 11px;
+}
 
 .admission-summary {
   margin: 0 0 14px;
@@ -452,6 +498,18 @@ legend {
   font-weight: 700;
   text-align: center;
 }
+.difficulty-dot {
+  display: inline-block;
+  flex: 0 0 auto;
+  width: 10px;
+  height: 10px;
+  margin-right: 4px;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+  vertical-align: -1px;
+}
 .admission-summary-counts strong {
   display: block;
   margin-top: 2px;
@@ -459,9 +517,9 @@ legend {
   font-weight: 900;
 }
 .summary-easy { color: #2e7d32; background: #e8f5e9; border-color: #a5d6a7 !important; }
-.summary-normal { color: #9a5b00; background: #fff9c4; border-color: #fff59d !important; }
+.summary-normal { color: #9a5b00; background: #fff9c4; border: 1.5px solid #e1b300 !important; }
 .summary-hard { color: #c62828; background: #ffebee; border-color: #ffcdd2 !important; }
-.summary-nodata { color: #1565c0; background: #e3f2fd; border-color: #90caf9 !important; }
+.summary-nodata { color: #616161; background: #f1f1f1; border-color: #bdbdbd !important; }
 
 /* Checkbox Row */
 .check-row {
@@ -914,12 +972,15 @@ select:focus {
 }
 .metric-label {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 3px;
+  min-width: 0;
   color: var(--muted);
   font-size: 10px;
   font-weight: 800;
-  white-space: nowrap;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 .metric-icon {
   font-size: 13px;
@@ -927,14 +988,15 @@ select:focus {
 }
 .metric strong {
   display: block;
-  overflow: hidden;
+  overflow: visible;
   margin-top: 3px;
   color: var(--ink);
   font-size: 15px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 /* Admission difficulty on cards and details */
@@ -961,6 +1023,7 @@ select:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 3px;
   min-height: 26px;
   padding: 3px 9px;
   border: 1px solid;
@@ -970,9 +1033,9 @@ select:focus {
   white-space: nowrap;
 }
 .badge-easy { color: #2e7d32; background: #e8f5e9; border-color: #a5d6a7; }
-.badge-normal { color: #9a5b00; background: #fff9c4; border-color: #fff59d; }
+.badge-normal { color: #9a5b00; background: #fff9c4; border: 1.5px solid #e1b300; }
 .badge-hard { color: #c62828; background: #ffebee; border-color: #ffcdd2; }
-.badge-nodata { color: #1565c0; background: #e3f2fd; border-color: #90caf9; }
+.badge-nodata { color: #616161; background: #f1f1f1; border-color: #bdbdbd; }
 .badge-none { color: #757575; background: #f5f5f5; border-color: #e0e0e0; }
 .difficulty-subtext {
   margin: 5px 0 0;
@@ -1038,6 +1101,12 @@ select:focus {
 .feature-tag.accent .tag-icon {
   color: var(--pink-primary);
 }
+.feature-tag.garden {
+  color: #5f5b55;
+  background: #eeeeec;
+  border: 1px solid #d7d5d0;
+}
+.feature-tag.garden .tag-icon { color: #77736d; }
 /* Card Actions */
 .card-actions {
   display: flex;

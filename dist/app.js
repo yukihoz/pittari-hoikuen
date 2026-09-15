@@ -58,26 +58,29 @@
     const latestRecord = historyRecords?.["2025"];
     const is3YearsVacant = ["2025", "2024", "2023"].every((year) => historyRecords?.[year]?.status === "vacant");
     if (is3YearsVacant) {
-      return { level: "easy", label: "🟢 入りやすい", subtext: "3年連続空き枠あり", badgeClass: "badge-easy", isAvailableThisYear: true };
+      return { level: "easy", label: "入りやすい", subtext: "3年連続空き枠あり", badgeClass: "badge-easy", isAvailableThisYear: true };
+    }
+    if (latestRecord?.status === "vacant") {
+      return { level: "easy", label: "入りやすい", subtext: "前回空き枠あり", badgeClass: "badge-easy", isAvailableThisYear: true };
     }
     const isNoPastData = !latestRecord || ["unopened", "full", "none", "unknown"].includes(latestRecord.status) || !latestRecord.score;
     if (isNoPastData) {
       const isNew = latestRecord?.status === "unopened";
-      return { level: "no-data", label: isNew ? "🆕 新設園（実績なし）" : "🔍 前回データなし", subtext: isNew ? "今年度新規開園" : "今年度受入枠あり", badgeClass: "badge-nodata", isAvailableThisYear: true };
+      return { level: "no-data", label: isNew ? "新設園（実績なし）" : "前回データなし", subtext: isNew ? "今年度新規開園" : "今年度受入枠あり", badgeClass: "badge-nodata", isAvailableThisYear: true };
     }
     const nurseryScore = Number.parseInt(String(latestRecord.score).replace(/[^0-9]/g, ""), 10);
     const rank = latestRecord.rank || "";
     if (!Number.isFinite(nurseryScore)) {
-      return { level: "no-data", label: "🔍 前回データなし", subtext: "今年度受入枠あり", badgeClass: "badge-nodata", isAvailableThisYear: true };
+      return { level: "no-data", label: "前回データなし", subtext: "今年度受入枠あり", badgeClass: "badge-nodata", isAvailableThisYear: true };
     }
-    if (userScore > nurseryScore) return { level: "easy", label: "🟢 入りやすい", badgeClass: "badge-easy", isAvailableThisYear: true };
-    if (userScore < nurseryScore) return { level: "hard", label: "🔴 入りにくい", badgeClass: "badge-hard", isAvailableThisYear: true };
+    if (userScore > nurseryScore) return { level: "easy", label: "入りやすい", badgeClass: "badge-easy", isAvailableThisYear: true };
+    if (userScore < nurseryScore) return { level: "hard", label: "入りにくい", badgeClass: "badge-hard", isAvailableThisYear: true };
     if (userScore === 40) {
-      if (["A", "B", "C"].includes(rank)) return { level: "hard", label: "🔴 入りにくい", subtext: "40点上位層のみ内定", badgeClass: "badge-hard", isAvailableThisYear: true };
-      if (["D", "E", "F", "G"].includes(rank)) return { level: "normal", label: "🟡 普通", subtext: "40点届くかやや不確か", badgeClass: "badge-normal", isAvailableThisYear: true };
-      return { level: "easy", label: "🟢 入りやすい", subtext: "40点でも届きやすい", badgeClass: "badge-easy", isAvailableThisYear: true };
+      if (["A", "B", "C"].includes(rank)) return { level: "hard", label: "入りにくい", subtext: "40点上位層のみ内定", badgeClass: "badge-hard", isAvailableThisYear: true };
+      if (["D", "E", "F", "G"].includes(rank)) return { level: "normal", label: "普通", subtext: "40点届くかやや不確か", badgeClass: "badge-normal", isAvailableThisYear: true };
+      return { level: "easy", label: "入りやすい", subtext: "40点でも届きやすい", badgeClass: "badge-easy", isAvailableThisYear: true };
     }
-    return { level: "normal", label: "🟡 普通", badgeClass: "badge-normal", isAvailableThisYear: true };
+    return { level: "normal", label: "普通", badgeClass: "badge-normal", isAvailableThisYear: true };
   }
 
   const difficultyFor = (item) => getAdmissionDifficulty(state.userScore, item.capacity?.[state.age], admissionFor(item)?.ages?.[state.age]?.years);
@@ -97,19 +100,59 @@
     if (!hasAdmissionInformation(item)) return "";
     const difficulty = difficultyFor(item);
     const years = admissionFor(item)?.ages?.[state.age]?.years || {};
-    const historyYears = detailed ? ["2025", "2024", "2023", "2022"] : ["2025", "2024", "2023"];
+    const historyYears = detailed ? ["2022", "2023", "2024", "2025"] : ["2023", "2024", "2025"];
     const eraLabels = { "2025": "R7", "2024": "R6", "2023": "R5", "2022": "R4" };
-    const history = historyYears.map((year, index) => `<span class="history-item${index === 0 ? " latest" : ""}"><span>${eraLabels[year]}</span><strong>${safe(historyValue(years[year]))}</strong></span>`).join("");
+    const history = historyYears.map((year) => `<span class="history-item${year === "2025" ? " latest" : ""}"><span>${eraLabels[year]}</span><strong>${safe(historyValue(years[year]))}</strong></span>`).join("");
     return `<div class="admission-status-box${detailed ? " admission-status-detail" : ""}">
       <div class="difficulty-header">
         <span class="age-label">${safe(admissionAgeLabels[state.age])}</span>
-        <span class="difficulty-badge ${difficulty.badgeClass}">${safe(difficulty.label)}</span>
+        <span class="difficulty-badge ${difficulty.badgeClass}"><span class="difficulty-dot" aria-hidden="true"></span>${safe(difficulty.label)}</span>
       </div>
       ${difficulty.subtext ? `<p class="difficulty-subtext">${safe(difficulty.subtext)}</p>` : ""}
       <div class="history-track" aria-label="過去の利用調整実績">${history}</div>
       ${detailed ? `<p class="difficulty-score-note">持ち点${state.userScore}点で判定しています。直近の利用調整実績をもとにした目安であり、入園を保証するものではありません。</p>` : ""}
     </div>`;
   }
+
+  function admissionDifficultyExplanation() {
+    return `<div class="difficulty-explanation">
+      <h4><span class="material-symbols-rounded" aria-hidden="true">lightbulb</span>入園難易度（入りやすい / 普通 / 入りにくい）の判定について</h4>
+      <p>前回（2026年2月）の利用調整結果のデータを元に、簡易的に入園のしやすさを3段階で表示しています。</p>
+      <p>前回の最終内定順位（A〜P）と最低指数をもとに、以下のように判定しています：</p>
+      <section class="difficulty-rule rule-easy">
+        <h5><span class="difficulty-dot" aria-hidden="true"></span>入りやすい</h5>
+        <ul>
+          <li>ご自身の点数がその園の最低指数を上回っている</li>
+          <li>過去3年連続で定員割れ（空き枠）の実績がある</li>
+          <li><strong>【40点の場合】</strong>内定順位が下位（H〜P位）まで回ってきている（40点でも届きやすい）</li>
+        </ul>
+      </section>
+      <section class="difficulty-rule rule-normal">
+        <h5><span class="difficulty-dot" aria-hidden="true"></span>普通</h5>
+        <ul>
+          <li>ご自身の持ち点と園の最低指数が同点</li>
+          <li><strong>【40点の場合】</strong>内定順位が中位（D〜G位）で決着している（40点で届くかやや不確か）</li>
+        </ul>
+      </section>
+      <section class="difficulty-rule rule-hard">
+        <h5><span class="difficulty-dot" aria-hidden="true"></span>入りにくい</h5>
+        <ul>
+          <li>ご自身の持ち点が最低指数に届いていない</li>
+          <li><strong>【40点の場合】</strong>内定順位が上位（A〜C位）で埋まっている（40点の中で上位層のみ内定）</li>
+        </ul>
+      </section>
+      <h5 class="difficulty-question">Q. なぜ持ち点によって判定が変わるの？</h5>
+      <p>中央区の認可保育園選考では、ご家庭の就労状況などに応じた「指数（点数）」が高い順に内定が決まります。<br>そのため、同じ保育園でも「ご自身の持ち点が何点か」によって、受かりやすさは大きく変わります。スライダーをお手元の持ち点に合わせることで、各園の難易度がリアルタイムに切り替わります。</p>
+      <hr>
+      <h5 class="difficulty-question">Q. なぜ同じ「40点」の園でも判定が分かれるの？</h5>
+      <p>中央区では、両親フルタイム共働き（基本点20点＋20点＝40点）のご家庭が申込者の大半を占めています。<br>そのため、多くの園で最低指数が「40点」で並び、同点内での優先順位（居住歴や兄弟在園など）によって合否が決まります。<br>この部分をもう少し詳細に見極めるために、40点の場合には内定順位を上位（A〜C：1位から150位）、中位（D〜G：151位から350位）、下位（H〜P：351位から800位）の3段階に分けて上記の判定を行っています。</p>
+      <p class="difficulty-note">※この判定は直近2026年2月の4月第1回利用調整実績をもとにした目安です。毎年の申込倍率や募集定員によって変動します。</p>
+    </div>`;
+  }
+
+  document.querySelectorAll("[data-difficulty-explanation]").forEach((element) => {
+    element.innerHTML = admissionDifficultyExplanation();
+  });
 
   function matchesFeature(item, feature) {
     if (feature === "garden") return yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0;
@@ -170,10 +213,10 @@
     });
     els.admissionSummary.innerHTML = `<div class="admission-summary-heading"><span><span class="material-symbols-rounded">analytics</span>${safe(admissionAgeLabels[state.age])}・持ち点${state.userScore}点の目安</span><small>認可園を集計</small></div>
       <div class="admission-summary-counts">
-        <span class="summary-easy">🟢 入りやすい <strong>${counts.easy}園</strong></span>
-        <span class="summary-normal">🟡 普通 <strong>${counts.normal}園</strong></span>
-        <span class="summary-hard">🔴 入りにくい <strong>${counts.hard}園</strong></span>
-        <span class="summary-nodata">⚪ 前回データなし <strong>${counts["no-data"]}園</strong></span>
+        <span class="summary-easy"><span class="difficulty-dot" aria-hidden="true"></span>入りやすい <strong>${counts.easy}園</strong></span>
+        <span class="summary-normal"><span class="difficulty-dot" aria-hidden="true"></span>普通 <strong>${counts.normal}園</strong></span>
+        <span class="summary-hard"><span class="difficulty-dot" aria-hidden="true"></span>入りにくい <strong>${counts.hard}園</strong></span>
+        <span class="summary-nodata"><span class="difficulty-dot" aria-hidden="true"></span>前回データなし <strong>${counts["no-data"]}園</strong></span>
       </div>`;
   }
 
@@ -185,7 +228,7 @@
     const tags = [];
     const evaluation = evaluationFor(item);
     if (evaluation) tags.push(["第三者評価あり", "rate_review", true]);
-    if (yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0) tags.push(["園庭", "yard", false]);
+    if (yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0) tags.push(["園庭", "yard", false, "garden"]);
     if ((item.capacity?.["57d"] ?? 0) > 0) tags.push(["生後57日", "cake", true]);
     else if ((item.capacity?.["7m"] ?? 0) > 0) tags.push(["生後7か月", "cake", true]);
     if (yes(item.bicycle)) tags.push(["駐輪", "pedal_bike", false]);
@@ -383,8 +426,7 @@
       <details class="difficulty-help detail-difficulty-help">
         <summary>判定方法と注意点</summary>
         <div>
-          <p>ご自身の持ち点と前回の最低指数を比較し、40点で同点の場合は最終内定順位をA〜C、D〜G、H〜Pの3段階に分けて判定しています。過去3年連続で空き枠があった園は「入りやすい」としています。</p>
-          <p>2026年2月の4月第1回利用調整実績をもとにした簡易判定です。申込倍率や募集定員は毎年変動します。</p>
+          ${admissionDifficultyExplanation()}
         </div>
       </details>
     </section>`;
