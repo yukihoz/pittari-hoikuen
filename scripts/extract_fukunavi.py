@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Build a compact, factual index of Chuo nursery evaluations from Fukunavi.
+"""Build a factual index of Chuo nursery evaluations from Fukunavi.
 
-The generated browser data intentionally contains survey facts and derived topic
-labels, not the report prose. Readers are sent to the official report for detail.
+The generated browser data includes the published overall survey comment so the
+site can show the original context alongside survey facts and derived labels.
 """
 
 from __future__ import annotations
@@ -230,6 +230,7 @@ def parse_detail(item: dict, html: str) -> dict:
         })
     else:
         top = focus = None
+    result["comment"] = survey_comment
     result["commentSummary"] = comment_summary(survey_comment, satisfaction)
     return result
 

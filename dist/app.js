@@ -1,15 +1,15 @@
 (() => {
   const data = Array.isArray(window.NURSERY_DATA) ? window.NURSERY_DATA : [];
   const evaluations = Array.isArray(window.FUKUNAVI_DATA) ? window.FUKUNAVI_DATA : [];
-  const state = { query: "", category: "all", areas: new Set(), age: "", features: new Set(), sort: "number", compare: new Set() };
+  const state = { query: "", category: "all", areas: new Set(), age: "", features: new Set(), sort: "number", sortDirection: "asc", compare: new Set() };
   const els = {
     grid: document.querySelector("#results-grid"),
     count: document.querySelector("#result-count"),
     empty: document.querySelector("#empty-state"),
     active: document.querySelector("#active-filters"),
     search: document.querySelector("#search-input"),
-    age: document.querySelector("#age-filter"),
     sort: document.querySelector("#sort-select"),
+    sortDirectionButtons: document.querySelectorAll("[data-sort-direction]"),
     dock: document.querySelector("#compare-dock"),
     compareCount: document.querySelector("#compare-count"),
     detailDialog: document.querySelector("#detail-dialog"),
@@ -30,10 +30,17 @@
   const safe = (value) => String(value ?? "").replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
   const formatNum = (value, digits = 0) => present(value) ? Number(value).toLocaleString("ja-JP", { maximumFractionDigits: digits }) : "—";
   const formatDate = (value) => present(value) && /^\d{4}/.test(String(value)) ? `${String(value).slice(0, 4)}年${Number(String(value).slice(5, 7)) || ""}月` : "—";
-  const areaColor = (area) => area === "京橋" ? "#b88932" : area === "月島" ? "#6f8060" : "#8b7251";
+  const areaColor = (area) => area === "京橋" ? "#d36f84" : area === "月島" ? "#3f9991" : "#8b6cac";
   const ageLabels = { "57d": "生後57日", "7m": "生後7か月", age1: "1歳児", age2: "2歳児", age3: "3歳児", age4: "4歳児", age5: "5歳児" };
   const evaluationsByName = new Map(evaluations.map((evaluation) => [evaluation.siteKey || evaluation.key, evaluation]));
   const evaluationFor = (item) => evaluationsByName.get(normalized(item.name));
+  const facilityCategory = (item) => {
+    if (item.category === "認可保育園・こども園") return "licensed";
+    if (item.category === "認証保育所") return "certified";
+    if (item.category === "認可外・企業主導型" && item.type !== "企業主導型保育事業") return "unlicensed";
+    return "other";
+  };
+  const facilityCategoryOrder = { licensed: 0, certified: 1, unlicensed: 2, other: 3 };
 
   function matchesFeature(item, feature) {
     if (feature === "garden") return yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0;
@@ -49,24 +56,33 @@
   function getFiltered() {
     const query = normalized(state.query);
     const filtered = data.filter((item) => {
-      if (state.category === "licensed" && item.category !== "認可保育園・こども園") return false;
-      if (state.category === "other" && item.category === "認可保育園・こども園") return false;
+      if (state.category !== "all" && facilityCategory(item) !== state.category) return false;
       if (state.areas.size && !state.areas.has(item.area)) return false;
       if (state.age && !(Number(item.capacity?.[state.age]) > 0)) return false;
       if ([...state.features].some((feature) => !matchesFeature(item, feature))) return false;
       if (query && !normalized([item.name, item.address, item.operator, item.type, item.area].join(" ")).includes(query)) return false;
       return true;
     });
-    const descending = ["areaPerChild", "gardenPerChild", "teacherPerChild", "capacity"];
+    const direction = state.sortDirection === "desc" ? -1 : 1;
     filtered.sort((a, b) => {
-      if (state.sort === "opened") return String(b.opened ?? "").localeCompare(String(a.opened ?? ""));
-      if (descending.includes(state.sort)) {
-        const key = state.sort === "capacity" ? "total" : state.sort;
-        const av = state.sort === "capacity" ? a.capacity?.total : a[key];
-        const bv = state.sort === "capacity" ? b.capacity?.total : b[key];
-        return (Number(bv) || -1) - (Number(av) || -1);
+      if (state.sort === "number") {
+        return facilityCategoryOrder[facilityCategory(a)] - facilityCategoryOrder[facilityCategory(b)]
+          || direction * ((Number(a.number) || 9999) - (Number(b.number) || 9999))
+          || a.name.localeCompare(b.name, "ja");
       }
-      return (Number(a.number) || 9999) - (Number(b.number) || 9999) || a.name.localeCompare(b.name, "ja");
+      const valueFor = (item) => state.sort === "capacity" ? item.capacity?.total : item[state.sort];
+      const av = valueFor(a);
+      const bv = valueFor(b);
+      const aMissing = !present(av);
+      const bMissing = !present(bv);
+      if (aMissing !== bMissing) return aMissing ? 1 : -1;
+      if (aMissing && bMissing) return (Number(a.number) || 9999) - (Number(b.number) || 9999);
+      const compared = state.sort === "opened"
+        ? String(av).localeCompare(String(bv))
+        : Number(av) - Number(bv);
+      return direction * compared
+        || (Number(a.number) || 9999) - (Number(b.number) || 9999)
+        || a.name.localeCompare(b.name, "ja");
     });
     return filtered;
   }
@@ -78,7 +94,7 @@
   function featureTags(item) {
     const tags = [];
     const evaluation = evaluationFor(item);
-    if (evaluation) tags.push(["第三者評価あり", "rate_review", false, "evaluation"]);
+    if (evaluation) tags.push(["第三者評価あり", "rate_review", true]);
     if (yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0) tags.push(["園庭", "yard", false]);
     if ((item.capacity?.["57d"] ?? 0) > 0) tags.push(["生後57日", "cake", true]);
     else if ((item.capacity?.["7m"] ?? 0) > 0) tags.push(["生後7か月", "cake", true]);
@@ -133,8 +149,8 @@
   function renderActiveFilters() {
     const labels = [];
     if (state.query) labels.push(`検索: ${state.query}`);
-    if (state.category === "licensed") labels.push("認可のみ");
-    if (state.category === "other") labels.push("認可以外");
+    const categoryLabels = { licensed: "認可", certified: "認証", unlicensed: "認可外（無償化対象）", other: "その他" };
+    if (state.category !== "all") labels.push(categoryLabels[state.category]);
     state.areas.forEach((area) => labels.push(area));
     if (state.age) labels.push(`${ageLabels[state.age]}の定員あり`);
     const featureLabels = { garden: "園庭あり", bicycle: "駐輪あり", stroller: "ベビーカー置場", diaper: "おむつ準備負担少", contactApp: "連絡アプリ", medical: "医療的ケア児受入", evaluation: "第三者評価あり" };
@@ -144,19 +160,33 @@
 
   function syncControls() {
     document.querySelectorAll("[data-category]").forEach((button) => button.classList.toggle("is-active", button.dataset.category === state.category));
+    document.querySelectorAll("[data-age]").forEach((button) => button.classList.toggle("is-active", button.dataset.age === state.age));
     document.querySelectorAll('input[name="area"]').forEach((input) => { input.checked = state.areas.has(input.value); });
     document.querySelectorAll('input[name="feature"]').forEach((input) => { input.checked = state.features.has(input.value); });
     document.querySelectorAll("[data-quick]").forEach((button) => {
       const value = button.dataset.quick;
       button.classList.toggle("is-active", value === state.age || state.features.has(value));
     });
-    els.age.value = state.age;
     els.sort.value = state.sort;
+    const directionLabels = {
+      number: ["小さい番号順", "大きい番号順"],
+      areaPerChild: ["狭い順", "広い順"],
+      gardenPerChild: ["狭い順", "広い順"],
+      teacherPerChild: ["少ない順", "多い順"],
+      opened: ["古い順", "新しい順"],
+      capacity: ["少ない順", "多い順"],
+    }[state.sort];
+    els.sortDirectionButtons.forEach((button, index) => {
+      const active = button.dataset.sortDirection === state.sortDirection;
+      button.textContent = directionLabels[index];
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
     if (document.activeElement !== els.search) els.search.value = state.query;
   }
 
   function reset() {
-    state.query = ""; state.category = "all"; state.areas.clear(); state.age = ""; state.features.clear(); state.sort = "number";
+    state.query = ""; state.category = "all"; state.areas.clear(); state.age = ""; state.features.clear(); state.sort = "number"; state.sortDirection = "asc";
     els.search.value = "";
     render();
   }
@@ -180,6 +210,16 @@
     return `<div class="detail-cell"><span class="cell-label">${iconHtml}${safe(label)}</span><strong>${safe(present(value) ? value : "—")}</strong></div>`;
   }
 
+  function rankedValue(value, getValue, digits, unit) {
+    const current = Number(value);
+    if (!Number.isFinite(current) || current <= 0) return "—";
+    const available = data
+      .map((item) => Number(getValue(item)))
+      .filter((candidate) => Number.isFinite(candidate) && candidate > 0);
+    const rank = 1 + available.filter((candidate) => candidate > current).length;
+    return `${formatNum(current, digits)}${unit} (${rank}/${available.length})`;
+  }
+
   function evaluationSection(item) {
     const evaluation = evaluationFor(item);
     if (!evaluation) return "";
@@ -190,9 +230,6 @@
           <p class="evaluation-kicker"><span class="material-symbols-rounded icon-inline">rate_review</span>福ナビ・第三者評価</p>
           <h3>利用者調査と評価講評</h3>
         </div>
-        <a href="${safe(evaluation.url)}" target="_blank" rel="noreferrer">
-          <span class="material-symbols-rounded">open_in_new</span>公式レポートを読む
-        </a>
       </div>
       <div class="evaluation-stats">
         <div>
@@ -217,16 +254,21 @@
         </div>
       </div>
       <div class="evaluation-bar" aria-label="総合満足 ${safe(evaluation.satisfaction)}%"><span style="width:${Math.max(0, Math.min(100, Number(evaluation.satisfaction) || 0))}%"></span></div>
-      <div class="evaluation-comment">
-        <strong><span class="material-symbols-rounded icon-inline-sm">comment</span>調査結果全体のコメント（要約）</strong>
-        <p>${safe(evaluation.commentSummary || "公式レポートで調査結果をご確認ください。")}</p>
-      </div>
       <div class="evaluation-themes">
         ${themes("評価機関が挙げたよい点", evaluation.goodThemes, "good", "thumb_up")}
         ${themes("今後の改善テーマ", evaluation.improveThemes, "improve", "lightbulb")}
       </div>
+      <div class="evaluation-comment">
+        <strong><span class="material-symbols-rounded icon-inline-sm">comment</span>調査結果全体のコメント</strong>
+        <p>${safe(evaluation.comment || evaluation.commentSummary || "公式レポートで調査結果をご確認ください。")}</p>
+      </div>
       <p class="evaluation-agency"><span class="material-symbols-rounded icon-inline-sm">business</span>評価機関：${safe(evaluation.agency || "福ナビ掲載の評価機関")}</p>
-      <p class="evaluation-note">※「はい」の割合には無回答・非該当も含まれるため、低い数値がそのまま不満の割合を表すものではありません。要約とテーマ分類は、公式レポートを探しやすくするためこのサイトで整理しています。</p>
+      <p class="evaluation-note">※「はい」の割合には無回答・非該当も含まれるため、低い数値がそのまま不満の割合を表すものではありません。テーマ分類は、公式レポートを探しやすくするためこのサイトで整理しています。</p>
+      <div class="evaluation-actions">
+        <a href="${safe(evaluation.url)}" target="_blank" rel="noreferrer">
+          <span class="material-symbols-rounded">open_in_new</span>公式レポートを読む
+        </a>
+      </div>
     </section>`;
   }
 
@@ -264,23 +306,23 @@
       <section class="detail-section">
         <h3><span class="material-symbols-rounded icon-inline">apartment</span>施設・職員体制</h3>
         <div class="detail-grid">
-          ${detailCell("定員合計", present(item.capacity?.total) ? `${formatNum(item.capacity.total)}人` : "—", "groups")}
-          ${detailCell("延床面積", present(item.floorArea) ? `${formatNum(item.floorArea, 1)}㎡` : "—", "square_foot")}
-          ${detailCell("1人あたり延床面積", present(item.areaPerChild) ? `${formatNum(item.areaPerChild, 1)}㎡` : "—", "straighten")}
+          ${detailCell("定員合計", rankedValue(item.capacity?.total, (nursery) => nursery.capacity?.total, 0, "人"), "groups")}
+          ${detailCell("延床面積", rankedValue(item.floorArea, (nursery) => nursery.floorArea, 1, "㎡"), "square_foot")}
+          ${detailCell("1人あたり延床面積", rankedValue(item.areaPerChild, (nursery) => nursery.areaPerChild, 1, "㎡"), "straighten")}
           ${detailCell("園庭", item.gardenLabel, "yard")}
-          ${detailCell("園庭面積", present(item.gardenArea) ? `${formatNum(item.gardenArea, 1)}㎡` : "—", "park")}
-          ${detailCell("保育士数", present(item.nurseryTeachers) ? `${formatNum(item.nurseryTeachers, 1)}人` : "—", "badge")}
-          ${detailCell("職員数", present(item.totalStaff) ? `${formatNum(item.totalStaff, 1)}人` : "—", "support_agent")}
+          ${detailCell("園庭面積", rankedValue(item.gardenArea, (nursery) => nursery.gardenArea, 1, "㎡"), "park")}
+          ${detailCell("保育士数", rankedValue(item.nurseryTeachers, (nursery) => nursery.nurseryTeachers, 1, "人"), "badge")}
+          ${detailCell("職員数", rankedValue(item.totalStaff, (nursery) => nursery.totalStaff, 1, "人"), "support_agent")}
           ${detailCell("医療的ケア児", item.medicalCare, "medical_services")}
           ${detailCell("エレベーター", item.elevator, "elevator")}
         </div>
       </section>
-      ${evaluationSection(item)}
       ${item.category === "認可保育園・こども園" ? `
       <section class="detail-section">
         <h3><span class="material-symbols-rounded icon-inline">checklist</span>毎日の準備・設備</h3>
         <div class="detail-grid">${daily}</div>
       </section>` : ""}
+      ${evaluationSection(item)}
       ${present(item.inspectionDetail) ? `
       <section class="detail-section">
         <h3><span class="material-symbols-rounded icon-inline">policy</span>指導検査</h3>
@@ -309,25 +351,47 @@
 
   function showCompare() {
     const items = [...state.compare].map((id) => data.find((item) => item.id === id)).filter(Boolean);
-    const row = (label, icon, getValue) => `<tr><th scope="row"><span class="table-th-label">${icon ? `<span class="material-symbols-rounded table-icon">${icon}</span>` : ""}${safe(label)}</span></th>${items.map((item) => `<td>${safe(getValue(item) ?? "—")}</td>`).join("")}</tr>`;
+    const row = (label, icon, getValue, options = {}) => {
+      const values = items.map(getValue);
+      const numericValues = values.filter(present).map(Number).filter(Number.isFinite);
+      const distinctValues = new Set(numericValues);
+      const maximum = options.highlight === "max" && distinctValues.size > 1 ? Math.max(...numericValues) : null;
+      const cells = values.map((value) => {
+        const highlighted = (maximum !== null && present(value) && Number(value) === maximum)
+          || (options.highlight === "yes" && normalized(value) === "あり");
+        const display = options.format ? options.format(value) : (value ?? "—");
+        return `<td${highlighted ? ' class="compare-cell-highlight"' : ""}>${safe(display)}</td>`;
+      }).join("");
+      return `<tr><th scope="row"><span class="table-th-label">${icon ? `<span class="material-symbols-rounded table-icon">${icon}</span>` : ""}${safe(label)}</span></th>${cells}</tr>`;
+    };
+    const numberFormat = (unit, digits = 0) => (value) => present(value) ? `${formatNum(value, digits)}${unit}` : "—";
     els.compareContent.innerHTML = `<table class="compare-table"><thead><tr><th>比較項目</th>${items.map((item) => `<th>${safe(item.name)}</th>`).join("")}</tr></thead><tbody>
       ${row("エリア", "location_on", (x) => x.area)}
       ${row("種別", "category", (x) => x.type)}
-      ${row("定員合計", "groups", (x) => present(x.capacity?.total) ? `${formatNum(x.capacity.total)}人` : "—")}
-      ${row("0歳・生後57日", "cake", (x) => present(x.capacity?.["57d"]) ? `${formatNum(x.capacity["57d"])}人` : "—")}
-      ${row("0歳・生後7か月", "cake", (x) => present(x.capacity?.["7m"]) ? `${formatNum(x.capacity["7m"])}人` : "—")}
-      ${row("1人あたり延床面積", "straighten", (x) => present(x.areaPerChild) ? `${formatNum(x.areaPerChild, 1)}㎡` : "—")}
-      ${row("園庭", "yard", (x) => x.gardenLabel)}
-      ${row("駐輪スペース", "pedal_bike", (x) => x.bicycle)}
-      ${row("ベビーカー置場", "stroller", (x) => x.stroller)}
-      ${row("利用者の総合満足", "sentiment_very_satisfied", (x) => { const evaluation = evaluationFor(x); return evaluation ? `${formatNum(evaluation.satisfaction, 1)}%` : "—"; })}
-      ${row("子どもの気持ちを尊重", "favorite", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.respect ? `${formatNum(evaluation.keyItems.respect.yesRate, 1)}%` : "—"; })}
-      ${row("園と家庭の信頼関係", "handshake", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.trust ? `${formatNum(evaluation.keyItems.trust.yesRate, 1)}%` : "—"; })}
-      ${row("安全対策", "verified_user", (x) => { const evaluation = evaluationFor(x); return evaluation?.keyItems?.safety ? `${formatNum(evaluation.keyItems.safety.yesRate, 1)}%` : "—"; })}
+      ${row("定員合計", "groups", (x) => x.capacity?.total, { highlight: "max", format: numberFormat("人") })}
+      ${row("0歳・生後57日", "cake", (x) => x.capacity?.["57d"], { highlight: "max", format: numberFormat("人") })}
+      ${row("0歳・生後7か月", "cake", (x) => x.capacity?.["7m"], { highlight: "max", format: numberFormat("人") })}
+      ${row("延床面積", "square_foot", (x) => x.floorArea, { highlight: "max", format: numberFormat("㎡", 1) })}
+      ${row("1人あたり延床面積", "straighten", (x) => x.areaPerChild, { highlight: "max", format: numberFormat("㎡", 1) })}
+      ${row("園庭", "yard", (x) => x.gardenLabel, { highlight: "yes" })}
+      ${row("駐輪スペース", "pedal_bike", (x) => x.bicycle, { highlight: "yes" })}
+      ${row("ベビーカー置場", "stroller", (x) => x.stroller, { highlight: "yes" })}
+      ${row("利用者の総合満足", "sentiment_very_satisfied", (x) => evaluationFor(x)?.satisfaction, { highlight: "max", format: numberFormat("%", 1) })}
+      ${row("子どもの気持ちを尊重", "favorite", (x) => evaluationFor(x)?.keyItems?.respect?.yesRate, { highlight: "max", format: numberFormat("%", 1) })}
+      ${row("園と家庭の信頼関係", "handshake", (x) => evaluationFor(x)?.keyItems?.trust?.yesRate, { highlight: "max", format: numberFormat("%", 1) })}
+      ${row("安全対策", "verified_user", (x) => evaluationFor(x)?.keyItems?.safety?.yesRate, { highlight: "max", format: numberFormat("%", 1) })}
       ${row("おむつ準備", "baby_changing_station", (x) => x.diaperPrep)}
       ${row("おむつ処分", "delete_outline", (x) => x.diaperDispose)}
-      ${row("連絡アプリ", "smartphone", (x) => x.contactApp)}
-      ${row("住所", "place", (x) => x.address)}</tbody></table>`;
+      ${row("連絡アプリ", "smartphone", (x) => x.contactApp, { highlight: "yes" })}
+      ${row("住所", "place", (x) => x.address)}</tbody><tfoot><tr class="compare-actions-row"><th scope="row"><span class="table-th-label"><span class="material-symbols-rounded table-icon">open_in_new</span>詳細</span></th>${items.map((item) => `<td><button class="compare-detail-button" type="button" data-compare-detail="${safe(item.id)}" aria-label="${safe(item.name)}の詳細を見る"><span class="material-symbols-rounded">info</span>詳細を見る</button></td>`).join("")}</tr></tfoot></table>`;
+    els.compareContent.querySelectorAll("[data-compare-detail]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const item = data.find((nursery) => nursery.id === button.dataset.compareDetail);
+        if (!item) return;
+        els.compareDialog.close();
+        showDetail(item);
+      });
+    });
     els.compareDialog.showModal();
   }
 
@@ -335,11 +399,12 @@
     const context = document.modelContext;
     if (!context?.registerTool) return;
     const allowed = {
-      category: ["all", "licensed", "other"],
+      category: ["all", "licensed", "certified", "unlicensed", "other"],
       areas: ["京橋", "日本橋", "月島"],
       age: ["", "57d", "7m", "age1", "age2", "age3", "age4", "age5"],
       features: ["garden", "bicycle", "stroller", "diaper", "contactApp", "medical", "evaluation"],
       sort: ["number", "areaPerChild", "gardenPerChild", "teacherPerChild", "opened", "capacity"],
+      sortDirection: ["asc", "desc"],
     };
     const tool = {
       name: "filter_nurseries",
@@ -354,6 +419,7 @@
           age: { type: "string", enum: allowed.age },
           features: { type: "array", items: { type: "string", enum: allowed.features }, uniqueItems: true },
           sort: { type: "string", enum: allowed.sort },
+          sortDirection: { type: "string", enum: allowed.sortDirection },
         },
         additionalProperties: false,
       },
@@ -363,6 +429,7 @@
         if (value.category !== undefined && !allowed.category.includes(value.category)) throw new Error("categoryが不正です");
         if (value.age !== undefined && !allowed.age.includes(value.age)) throw new Error("ageが不正です");
         if (value.sort !== undefined && !allowed.sort.includes(value.sort)) throw new Error("sortが不正です");
+        if (value.sortDirection !== undefined && !allowed.sortDirection.includes(value.sortDirection)) throw new Error("sortDirectionが不正です");
         if (value.areas !== undefined && (!Array.isArray(value.areas) || value.areas.some((x) => !allowed.areas.includes(x)))) throw new Error("areasが不正です");
         if (value.features !== undefined && (!Array.isArray(value.features) || value.features.some((x) => !allowed.features.includes(x)))) throw new Error("featuresが不正です");
         state.query = typeof value.query === "string" ? value.query : "";
@@ -371,6 +438,7 @@
         state.age = value.age ?? "";
         state.features = new Set(value.features ?? []);
         state.sort = value.sort ?? "number";
+        state.sortDirection = value.sortDirection ?? "asc";
         els.search.value = state.query;
         render();
         const results = getFiltered();
@@ -382,9 +450,10 @@
 
   let timer;
   els.search.addEventListener("input", (event) => { clearTimeout(timer); timer = setTimeout(() => { state.query = event.target.value; render(); }, 120); });
-  els.age.addEventListener("change", (event) => { state.age = event.target.value; render(); });
   els.sort.addEventListener("change", (event) => { state.sort = event.target.value; render(); });
+  els.sortDirectionButtons.forEach((button) => button.addEventListener("click", () => { state.sortDirection = button.dataset.sortDirection; render(); }));
   document.querySelectorAll("[data-category]").forEach((button) => button.addEventListener("click", () => { state.category = button.dataset.category; render(); }));
+  document.querySelectorAll("[data-age]").forEach((button) => button.addEventListener("click", () => { state.age = button.dataset.age; render(); }));
   document.querySelectorAll('input[name="area"]').forEach((input) => input.addEventListener("change", () => { input.checked ? state.areas.add(input.value) : state.areas.delete(input.value); render(); }));
   document.querySelectorAll('input[name="feature"]').forEach((input) => input.addEventListener("change", () => { input.checked ? state.features.add(input.value) : state.features.delete(input.value); render(); }));
   document.querySelectorAll("[data-quick]").forEach((button) => button.addEventListener("click", () => {

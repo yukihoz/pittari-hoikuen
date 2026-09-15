@@ -160,11 +160,29 @@ def map_other(row, category):
     }
 
 
+def facility_sort_group(record):
+    if record.get("category") == "認可保育園・こども園":
+        return 0
+    if record.get("category") == "認証保育所":
+        return 1
+    if record.get("category") == "認可外・企業主導型" and record.get("type") != "企業主導型保育事業":
+        return 2
+    return 3
+
+
 workbook = openpyxl.load_workbook(SOURCE, data_only=True, read_only=False)
 records = [map_licensed(row) for row in load_rows(workbook, "認可")]
 records += [map_other(row, "地域型保育") for row in load_rows(workbook, "地域型保育")]
 records += [map_other(row, "認証保育所") for row in load_rows(workbook, "認証")]
 records += [map_other(row, "認可外・企業主導型") for row in load_rows(workbook, "認可外・企業主導型")]
+
+records.sort(key=lambda record: (
+    facility_sort_group(record),
+    record.get("number") if record.get("number") is not None else float("inf"),
+    record.get("name") or "",
+))
+for facility_number, record in enumerate(records, start=1):
+    record["number"] = facility_number
 
 OUTPUT.parent.mkdir(parents=True, exist_ok=True)
 payload = json.dumps(records, ensure_ascii=False, separators=(",", ":"), default=str)
