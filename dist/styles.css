@@ -329,6 +329,140 @@ legend {
   font-size: 12px;
 }
 
+/* Admission difficulty controls */
+.admission-settings {
+  display: grid;
+  gap: 12px;
+}
+.score-control {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--line-light);
+  border-radius: var(--radius-md);
+  background: #fff8d9;
+}
+.score-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-weight: 800;
+}
+.score-heading output {
+  flex: none;
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  color: #6d5000;
+  background: #f6db5e;
+  font-size: 14px;
+  font-weight: 900;
+  font-variant-numeric: tabular-nums;
+}
+.score-control input[type="range"] {
+  width: 100%;
+  accent-color: #c29400;
+  cursor: pointer;
+}
+.score-scale {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 1px;
+  color: var(--muted);
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+.score-scale span:first-child { text-align: left; }
+.score-scale span:last-child { text-align: right; }
+.score-scale small { font-size: 7px; }
+.score-scale .standard-score { color: #795b00; font-weight: 900; }
+.difficulty-toggle {
+  margin-top: 0;
+  padding-block: 2px;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.difficulty-help {
+  border-radius: var(--radius-md);
+  background: #f8f3e7;
+  color: var(--ink-secondary);
+  font-size: 12px;
+  line-height: 1.65;
+}
+.difficulty-help summary {
+  padding: 9px 11px;
+  color: #775a12;
+  font-weight: 800;
+  cursor: pointer;
+}
+.difficulty-help > div {
+  padding: 0 11px 10px;
+}
+.difficulty-help p { margin: 0 0 8px; }
+.difficulty-help p:last-child { margin-bottom: 0; }
+.difficulty-help ul { margin: 0 0 8px; padding-left: 18px; }
+.difficulty-help li + li { margin-top: 5px; }
+
+.admission-summary {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid #e5c74b;
+  border-radius: var(--radius-lg);
+  background: rgba(255, 252, 231, 0.9);
+  box-shadow: var(--shadow-sm);
+}
+.admission-summary-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+  color: var(--ink-secondary);
+  font-size: 13px;
+  font-weight: 800;
+}
+.admission-summary-heading > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.admission-summary-heading .material-symbols-rounded {
+  color: #c29400;
+  font-size: 18px;
+}
+.admission-summary-heading small {
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.admission-summary-counts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+.admission-summary-counts > span {
+  padding: 7px 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+.admission-summary-counts strong {
+  display: block;
+  margin-top: 2px;
+  font-size: 15px;
+  font-weight: 900;
+}
+.summary-easy { color: #2e7d32; background: #e8f5e9; border-color: #a5d6a7 !important; }
+.summary-normal { color: #9a5b00; background: #fff9c4; border-color: #fff59d !important; }
+.summary-hard { color: #c62828; background: #ffebee; border-color: #ffcdd2 !important; }
+.summary-nodata { color: #1565c0; background: #e3f2fd; border-color: #90caf9 !important; }
+
 /* Checkbox Row */
 .check-row {
   display: flex;
@@ -803,6 +937,77 @@ select:focus {
   white-space: nowrap;
 }
 
+/* Admission difficulty on cards and details */
+.admission-status-slot:empty { display: none; }
+.admission-status-box {
+  margin-top: 12px;
+  padding: 10px;
+  border: 1px solid #ead680;
+  border-radius: var(--radius-md);
+  background: #fffdf3;
+}
+.difficulty-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.age-label {
+  color: var(--ink-secondary);
+  font-size: 11px;
+  font-weight: 800;
+}
+.difficulty-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 26px;
+  padding: 3px 9px;
+  border: 1px solid;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+.badge-easy { color: #2e7d32; background: #e8f5e9; border-color: #a5d6a7; }
+.badge-normal { color: #9a5b00; background: #fff9c4; border-color: #fff59d; }
+.badge-hard { color: #c62828; background: #ffebee; border-color: #ffcdd2; }
+.badge-nodata { color: #1565c0; background: #e3f2fd; border-color: #90caf9; }
+.badge-none { color: #757575; background: #f5f5f5; border-color: #e0e0e0; }
+.difficulty-subtext {
+  margin: 5px 0 0;
+  color: var(--muted);
+  font-size: 10px;
+  font-weight: 700;
+  text-align: right;
+}
+.history-track {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 5px;
+  margin-top: 8px;
+}
+.history-item {
+  min-width: 0;
+  padding: 5px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--muted);
+  background: #f7f3e9;
+  font-size: 9px;
+  line-height: 1.3;
+}
+.history-item span { display: block; font-weight: 800; }
+.history-item strong {
+  display: block;
+  overflow: hidden;
+  margin-top: 2px;
+  color: var(--ink-secondary);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.history-item.latest { background: #fff3bd; }
+
 /* Feature Tags */
 .feature-tags {
   display: flex;
@@ -1129,6 +1334,61 @@ dialog h3 .material-symbols-rounded {
   font-size: 14px;
   font-weight: 800;
 }
+
+.admission-detail-section {
+  overflow: hidden;
+  padding: 20px;
+  border: 1.5px solid #e5c74b;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #fff9d7 0%, #fffef8 72%);
+}
+.admission-detail-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.admission-detail-kicker {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 0 3px;
+  color: #a27800;
+  font-size: 11px;
+  font-weight: 800;
+}
+.admission-detail-heading h3 { margin: 0; }
+.score-pill {
+  flex: none;
+  padding: 5px 10px;
+  border-radius: var(--radius-full);
+  color: #6d5000;
+  background: #f6db5e;
+  font-size: 12px;
+  font-weight: 900;
+}
+.admission-status-detail {
+  margin-top: 14px;
+  padding: 14px;
+  background: #fff;
+}
+.admission-status-detail .age-label { font-size: 13px; }
+.admission-status-detail .difficulty-badge { min-height: 30px; font-size: 12px; }
+.admission-status-detail .history-track { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.admission-status-detail .history-item { padding: 8px; font-size: 10px; }
+.admission-status-detail .history-item strong {
+  overflow: visible;
+  font-size: 11px;
+  text-overflow: clip;
+  white-space: normal;
+}
+.difficulty-score-note {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.55;
+}
+.detail-difficulty-help { margin-top: 10px; background: rgba(255, 255, 255, 0.72); }
 
 /* Evaluation Section in Dialog */
 .evaluation-section {

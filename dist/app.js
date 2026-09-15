@@ -1,7 +1,8 @@
 (() => {
   const data = Array.isArray(window.NURSERY_DATA) ? window.NURSERY_DATA : [];
+  const admissionData = Array.isArray(window.ADMISSION_DATA) ? window.ADMISSION_DATA : [];
   const evaluations = Array.isArray(window.FUKUNAVI_DATA) ? window.FUKUNAVI_DATA : [];
-  const state = { query: "", category: "all", areas: new Set(), age: "", features: new Set(), sort: "number", sortDirection: "asc", compare: new Set() };
+  const state = { query: "", category: "all", areas: new Set(), age: "age1", userScore: 40, showEasyNormalOnly: false, features: new Set(), sort: "number", sortDirection: "asc", compare: new Set() };
   const els = {
     grid: document.querySelector("#results-grid"),
     count: document.querySelector("#result-count"),
@@ -22,6 +23,10 @@
     filterOpen: document.querySelector("[data-filter-open]"),
     filterClose: document.querySelector(".mobile-filter-close"),
     filterBackdrop: document.querySelector(".filter-backdrop"),
+    admissionSummary: document.querySelector("#admission-summary"),
+    scoreInputs: document.querySelectorAll("[data-score-input]"),
+    scoreOutputs: document.querySelectorAll("[data-score-output]"),
+    difficultyFilters: document.querySelectorAll("[data-difficulty-filter]"),
   };
 
   const normalized = (value) => String(value ?? "").normalize("NFKC").toLowerCase().replace(/\s+/g, "");
@@ -32,8 +37,12 @@
   const formatDate = (value) => present(value) && /^\d{4}/.test(String(value)) ? `${String(value).slice(0, 4)}年${Number(String(value).slice(5, 7)) || ""}月` : "—";
   const areaColor = (area) => area === "京橋" ? "#d36f84" : area === "月島" ? "#3f9991" : "#8b6cac";
   const ageLabels = { "57d": "生後57日", "7m": "生後7か月", age1: "1歳児", age2: "2歳児", age3: "3歳児", age4: "4歳児", age5: "5歳児" };
+  const admissionAgeLabels = { "57d": "0歳児（57日）入園", "7m": "0歳児（7か月）入園", age1: "1歳児入園", age2: "2歳児入園", age3: "3歳児入園", age4: "4歳児入園", age5: "5歳児入園" };
   const evaluationsByName = new Map(evaluations.map((evaluation) => [evaluation.siteKey || evaluation.key, evaluation]));
+  const admissionsById = new Map(admissionData.map((record) => [record.id, record]));
+  const admissionsByName = new Map(admissionData.map((record) => [normalized(record.name), record]));
   const evaluationFor = (item) => evaluationsByName.get(normalized(item.name));
+  const admissionFor = (item) => admissionsById.get(item.id) || admissionsByName.get(normalized(item.name));
   const facilityCategory = (item) => {
     if (item.category === "認可保育園・こども園") return "licensed";
     if (item.category === "認証保育所") return "certified";
@@ -41,6 +50,66 @@
     return "other";
   };
   const facilityCategoryOrder = { licensed: 0, certified: 1, unlicensed: 2, other: 3 };
+
+  function getAdmissionDifficulty(userScore, currentCapacity, historyRecords) {
+    if (!(Number(currentCapacity) > 0)) {
+      return { level: "none", label: "今年度枠なし", badgeClass: "badge-none", isAvailableThisYear: false };
+    }
+    const latestRecord = historyRecords?.["2025"];
+    const is3YearsVacant = ["2025", "2024", "2023"].every((year) => historyRecords?.[year]?.status === "vacant");
+    if (is3YearsVacant) {
+      return { level: "easy", label: "🟢 入りやすい", subtext: "3年連続空き枠あり", badgeClass: "badge-easy", isAvailableThisYear: true };
+    }
+    const isNoPastData = !latestRecord || ["unopened", "full", "none", "unknown"].includes(latestRecord.status) || !latestRecord.score;
+    if (isNoPastData) {
+      const isNew = latestRecord?.status === "unopened";
+      return { level: "no-data", label: isNew ? "🆕 新設園（実績なし）" : "🔍 前回データなし", subtext: isNew ? "今年度新規開園" : "今年度受入枠あり", badgeClass: "badge-nodata", isAvailableThisYear: true };
+    }
+    const nurseryScore = Number.parseInt(String(latestRecord.score).replace(/[^0-9]/g, ""), 10);
+    const rank = latestRecord.rank || "";
+    if (!Number.isFinite(nurseryScore)) {
+      return { level: "no-data", label: "🔍 前回データなし", subtext: "今年度受入枠あり", badgeClass: "badge-nodata", isAvailableThisYear: true };
+    }
+    if (userScore > nurseryScore) return { level: "easy", label: "🟢 入りやすい", badgeClass: "badge-easy", isAvailableThisYear: true };
+    if (userScore < nurseryScore) return { level: "hard", label: "🔴 入りにくい", badgeClass: "badge-hard", isAvailableThisYear: true };
+    if (userScore === 40) {
+      if (["A", "B", "C"].includes(rank)) return { level: "hard", label: "🔴 入りにくい", subtext: "40点上位層のみ内定", badgeClass: "badge-hard", isAvailableThisYear: true };
+      if (["D", "E", "F", "G"].includes(rank)) return { level: "normal", label: "🟡 普通", subtext: "40点届くかやや不確か", badgeClass: "badge-normal", isAvailableThisYear: true };
+      return { level: "easy", label: "🟢 入りやすい", subtext: "40点でも届きやすい", badgeClass: "badge-easy", isAvailableThisYear: true };
+    }
+    return { level: "normal", label: "🟡 普通", badgeClass: "badge-normal", isAvailableThisYear: true };
+  }
+
+  const difficultyFor = (item) => getAdmissionDifficulty(state.userScore, item.capacity?.[state.age], admissionFor(item)?.ages?.[state.age]?.years);
+  const hasAdmissionInformation = (item) => facilityCategory(item) === "licensed" || Boolean(admissionFor(item));
+
+  function historyValue(record) {
+    if (!record) return "—";
+    if (record.status === "vacant") return "空きあり";
+    if (record.status === "full") return "定員到達";
+    if (record.status === "none") return "受入なし";
+    if (record.status === "unopened") return "未開園";
+    if (record.score) return `${record.score}${record.rank ? `（${record.rank}位）` : ""}`;
+    return "—";
+  }
+
+  function admissionStatusBox(item, detailed = false) {
+    if (!hasAdmissionInformation(item)) return "";
+    const difficulty = difficultyFor(item);
+    const years = admissionFor(item)?.ages?.[state.age]?.years || {};
+    const historyYears = detailed ? ["2025", "2024", "2023", "2022"] : ["2025", "2024", "2023"];
+    const eraLabels = { "2025": "R7", "2024": "R6", "2023": "R5", "2022": "R4" };
+    const history = historyYears.map((year, index) => `<span class="history-item${index === 0 ? " latest" : ""}"><span>${eraLabels[year]}</span><strong>${safe(historyValue(years[year]))}</strong></span>`).join("");
+    return `<div class="admission-status-box${detailed ? " admission-status-detail" : ""}">
+      <div class="difficulty-header">
+        <span class="age-label">${safe(admissionAgeLabels[state.age])}</span>
+        <span class="difficulty-badge ${difficulty.badgeClass}">${safe(difficulty.label)}</span>
+      </div>
+      ${difficulty.subtext ? `<p class="difficulty-subtext">${safe(difficulty.subtext)}</p>` : ""}
+      <div class="history-track" aria-label="過去の利用調整実績">${history}</div>
+      ${detailed ? `<p class="difficulty-score-note">持ち点${state.userScore}点で判定しています。直近の利用調整実績をもとにした目安であり、入園を保証するものではありません。</p>` : ""}
+    </div>`;
+  }
 
   function matchesFeature(item, feature) {
     if (feature === "garden") return yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0;
@@ -53,15 +122,21 @@
     return true;
   }
 
-  function getFiltered() {
+  function matchesCurrentFilters(item) {
     const query = normalized(state.query);
+    if (state.category !== "all" && facilityCategory(item) !== state.category) return false;
+    if (state.areas.size && !state.areas.has(item.area)) return false;
+    if ([...state.features].some((feature) => !matchesFeature(item, feature))) return false;
+    if (query && !normalized([item.name, item.address, item.operator, item.type, item.area].join(" ")).includes(query)) return false;
+    return true;
+  }
+
+  function getFiltered() {
     const filtered = data.filter((item) => {
-      if (state.category !== "all" && facilityCategory(item) !== state.category) return false;
-      if (state.areas.size && !state.areas.has(item.area)) return false;
-      if (state.age && !(Number(item.capacity?.[state.age]) > 0)) return false;
-      if ([...state.features].some((feature) => !matchesFeature(item, feature))) return false;
-      if (query && !normalized([item.name, item.address, item.operator, item.type, item.area].join(" ")).includes(query)) return false;
-      return true;
+      if (!matchesCurrentFilters(item)) return false;
+      if (!state.showEasyNormalOnly) return true;
+      if (!hasAdmissionInformation(item)) return false;
+      return ["easy", "normal", "no-data"].includes(difficultyFor(item).level);
     });
     const direction = state.sortDirection === "desc" ? -1 : 1;
     filtered.sort((a, b) => {
@@ -85,6 +160,21 @@
         || a.name.localeCompare(b.name, "ja");
     });
     return filtered;
+  }
+
+  function renderAdmissionSummary() {
+    const counts = { easy: 0, normal: 0, hard: 0, "no-data": 0 };
+    data.filter(matchesCurrentFilters).filter(hasAdmissionInformation).forEach((item) => {
+      const level = difficultyFor(item).level;
+      if (Object.hasOwn(counts, level)) counts[level] += 1;
+    });
+    els.admissionSummary.innerHTML = `<div class="admission-summary-heading"><span><span class="material-symbols-rounded">analytics</span>${safe(admissionAgeLabels[state.age])}・持ち点${state.userScore}点の目安</span><small>認可園を集計</small></div>
+      <div class="admission-summary-counts">
+        <span class="summary-easy">🟢 入りやすい <strong>${counts.easy}園</strong></span>
+        <span class="summary-normal">🟡 普通 <strong>${counts.normal}園</strong></span>
+        <span class="summary-hard">🔴 入りにくい <strong>${counts.hard}園</strong></span>
+        <span class="summary-nodata">⚪ 前回データなし <strong>${counts["no-data"]}園</strong></span>
+      </div>`;
   }
 
   function metric(icon, label, value) {
@@ -123,6 +213,7 @@
       metric("square_foot", "1人あたり面積", present(item.areaPerChild) ? `${formatNum(item.areaPerChild, 1)}㎡` : "—"),
       metric("event", "開設", formatDate(item.opened)),
     ].join("");
+    node.querySelector(".admission-status-slot").innerHTML = admissionStatusBox(item);
     node.querySelector(".feature-tags").innerHTML = featureTags(item);
     const open = () => showDetail(item);
     node.querySelector(".card-main").addEventListener("click", open);
@@ -142,6 +233,7 @@
     els.grid.hidden = items.length === 0;
     els.empty.hidden = items.length !== 0;
     renderActiveFilters();
+    renderAdmissionSummary();
     renderCompareDock();
     syncControls();
   }
@@ -152,7 +244,9 @@
     const categoryLabels = { licensed: "認可", certified: "認証", unlicensed: "認可外（無償化対象）", other: "その他" };
     if (state.category !== "all") labels.push(categoryLabels[state.category]);
     state.areas.forEach((area) => labels.push(area));
-    if (state.age) labels.push(`${ageLabels[state.age]}の定員あり`);
+    labels.push(`${ageLabels[state.age]}入園`);
+    labels.push(`持ち点${state.userScore}点`);
+    if (state.showEasyNormalOnly) labels.push("入りやすい・普通のみ");
     const featureLabels = { garden: "園庭あり", bicycle: "駐輪あり", stroller: "ベビーカー置場", diaper: "おむつ準備負担少", contactApp: "連絡アプリ", medical: "医療的ケア児受入", evaluation: "第三者評価あり" };
     state.features.forEach((feature) => labels.push(featureLabels[feature]));
     els.active.innerHTML = labels.map((label) => `<span class="filter-chip">${safe(label)}</span>`).join("");
@@ -163,6 +257,9 @@
     document.querySelectorAll("[data-age]").forEach((button) => button.classList.toggle("is-active", button.dataset.age === state.age));
     document.querySelectorAll('input[name="area"]').forEach((input) => { input.checked = state.areas.has(input.value); });
     document.querySelectorAll('input[name="feature"]').forEach((input) => { input.checked = state.features.has(input.value); });
+    els.scoreInputs.forEach((input) => { input.value = String(state.userScore); });
+    els.scoreOutputs.forEach((output) => { output.textContent = `${state.userScore}点`; });
+    els.difficultyFilters.forEach((input) => { input.checked = state.showEasyNormalOnly; });
     document.querySelectorAll("[data-quick]").forEach((button) => {
       const value = button.dataset.quick;
       button.classList.toggle("is-active", value === state.age || state.features.has(value));
@@ -186,7 +283,7 @@
   }
 
   function reset() {
-    state.query = ""; state.category = "all"; state.areas.clear(); state.age = ""; state.features.clear(); state.sort = "number"; state.sortDirection = "asc";
+    state.query = ""; state.category = "all"; state.areas.clear(); state.age = "age1"; state.userScore = 40; state.showEasyNormalOnly = false; state.features.clear(); state.sort = "number"; state.sortDirection = "asc";
     els.search.value = "";
     render();
   }
@@ -272,6 +369,27 @@
     </section>`;
   }
 
+  function admissionDetailSection(item) {
+    if (!hasAdmissionInformation(item)) return "";
+    return `<section class="detail-section admission-detail-section">
+      <div class="admission-detail-heading">
+        <div>
+          <p class="admission-detail-kicker"><span class="material-symbols-rounded icon-inline">analytics</span>利用調整実績から判定</p>
+          <h3>入園難易度の目安</h3>
+        </div>
+        <span class="score-pill">持ち点 ${state.userScore}点</span>
+      </div>
+      ${admissionStatusBox(item, true)}
+      <details class="difficulty-help detail-difficulty-help">
+        <summary>判定方法と注意点</summary>
+        <div>
+          <p>ご自身の持ち点と前回の最低指数を比較し、40点で同点の場合は最終内定順位をA〜C、D〜G、H〜Pの3段階に分けて判定しています。過去3年連続で空き枠があった園は「入りやすい」としています。</p>
+          <p>2026年2月の4月第1回利用調整実績をもとにした簡易判定です。申込倍率や募集定員は毎年変動します。</p>
+        </div>
+      </details>
+    </section>`;
+  }
+
   function showDetail(item) {
     const evaluation = evaluationFor(item);
     const mapUrl = present(item.lat) && present(item.lng) ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${item.lat},${item.lng}`)}` : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(item.address || item.name)}`;
@@ -322,6 +440,7 @@
         <h3><span class="material-symbols-rounded icon-inline">checklist</span>毎日の準備・設備</h3>
         <div class="detail-grid">${daily}</div>
       </section>` : ""}
+      ${admissionDetailSection(item)}
       ${evaluationSection(item)}
       ${present(item.inspectionDetail) ? `
       <section class="detail-section">
@@ -401,7 +520,7 @@
     const allowed = {
       category: ["all", "licensed", "certified", "unlicensed", "other"],
       areas: ["京橋", "日本橋", "月島"],
-      age: ["", "57d", "7m", "age1", "age2", "age3", "age4", "age5"],
+      age: ["57d", "7m", "age1", "age2", "age3", "age4", "age5"],
       features: ["garden", "bicycle", "stroller", "diaper", "contactApp", "medical", "evaluation"],
       sort: ["number", "areaPerChild", "gardenPerChild", "teacherPerChild", "opened", "capacity"],
       sortDirection: ["asc", "desc"],
@@ -420,6 +539,8 @@
           features: { type: "array", items: { type: "string", enum: allowed.features }, uniqueItems: true },
           sort: { type: "string", enum: allowed.sort },
           sortDirection: { type: "string", enum: allowed.sortDirection },
+          userScore: { type: "integer", minimum: 38, maximum: 43, description: "保活指数（持ち点）" },
+          showEasyNormalOnly: { type: "boolean", description: "入りやすい・普通・前回データなしの園だけを表示" },
         },
         additionalProperties: false,
       },
@@ -435,7 +556,10 @@
         state.query = typeof value.query === "string" ? value.query : "";
         state.category = value.category ?? "all";
         state.areas = new Set(value.areas ?? []);
-        state.age = value.age ?? "";
+        state.age = value.age ?? "age1";
+        if (value.userScore !== undefined && (!Number.isInteger(value.userScore) || value.userScore < 38 || value.userScore > 43)) throw new Error("userScoreが不正です");
+        state.userScore = value.userScore ?? 40;
+        state.showEasyNormalOnly = value.showEasyNormalOnly ?? false;
         state.features = new Set(value.features ?? []);
         state.sort = value.sort ?? "number";
         state.sortDirection = value.sortDirection ?? "asc";
@@ -454,11 +578,13 @@
   els.sortDirectionButtons.forEach((button) => button.addEventListener("click", () => { state.sortDirection = button.dataset.sortDirection; render(); }));
   document.querySelectorAll("[data-category]").forEach((button) => button.addEventListener("click", () => { state.category = button.dataset.category; render(); }));
   document.querySelectorAll("[data-age]").forEach((button) => button.addEventListener("click", () => { state.age = button.dataset.age; render(); }));
+  els.scoreInputs.forEach((input) => input.addEventListener("input", () => { state.userScore = Number(input.value); render(); }));
+  els.difficultyFilters.forEach((input) => input.addEventListener("change", () => { state.showEasyNormalOnly = input.checked; render(); }));
   document.querySelectorAll('input[name="area"]').forEach((input) => input.addEventListener("change", () => { input.checked ? state.areas.add(input.value) : state.areas.delete(input.value); render(); }));
   document.querySelectorAll('input[name="feature"]').forEach((input) => input.addEventListener("change", () => { input.checked ? state.features.add(input.value) : state.features.delete(input.value); render(); }));
   document.querySelectorAll("[data-quick]").forEach((button) => button.addEventListener("click", () => {
     const value = button.dataset.quick;
-    if (["57d", "7m"].includes(value)) state.age = state.age === value ? "" : value;
+    if (["57d", "7m"].includes(value)) state.age = value;
     else state.features.has(value) ? state.features.delete(value) : state.features.add(value);
     render();
   }));
