@@ -116,14 +116,11 @@
     }).join("");
     return `<div class="admission-status-box${detailed ? " admission-status-detail" : ""}">
       <div class="difficulty-header">
-        <div class="difficulty-header-main">
-          <span class="age-label">${safe(admissionAgeLabels[state.age])}</span>
-          <span class="difficulty-badge ${difficulty.badgeClass}"><span class="difficulty-dot" aria-hidden="true"></span>${safe(difficulty.label)}</span>
-        </div>
-        <span class="latest-target-badge">直近・判定対象</span>
+        <span class="age-label">${safe(admissionAgeLabels[state.age])}</span>
+        <span class="difficulty-badge ${difficulty.badgeClass}"><span class="difficulty-dot" aria-hidden="true"></span>${safe(difficulty.label)}（R8）</span>
       </div>
       <div class="history-track" aria-label="過去の利用調整実績">${history}</div>
-      ${detailed ? `<p class="difficulty-score-note">持ち点${state.userScore}点で判定しています。直近の利用調整実績をもとにした目安であり、入園を保証するものではありません。</p>` : ""}
+      ${detailed ? `<p class="difficulty-score-note">持ち点${state.userScore}点で判定しています。直近（令和8年度）の利用調整実績をもとにした目安であり、入園を保証するものではありません。</p>` : ""}
     </div>`;
   }
 
@@ -246,19 +243,16 @@
   }
 
   function featureTags(item) {
-    const tags = [];
-    const evaluation = evaluationFor(item);
-    if (evaluation) tags.push(["第三者評価あり", "rate_review", "tag-evaluation"]);
-    if (yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0) tags.push(["園庭あり", "yard", "tag-garden"]);
-    if ((item.capacity?.["57d"] ?? 0) > 0) tags.push(["生後57日", "cake", "tag-age0"]);
-    else if ((item.capacity?.["7m"] ?? 0) > 0) tags.push(["生後7か月", "cake", "tag-age0"]);
-    if (yes(item.bicycle)) tags.push(["駐輪あり", "pedal_bike", "tag-bicycle"]);
-    if (yes(item.stroller)) tags.push(["ベビーカー", "stroller", "tag-stroller"]);
-    if (/園|サブスク/.test(item.diaperPrep ?? "") && !/保護者\s*$/.test(item.diaperPrep ?? "")) tags.push(["おむつ楽", "baby_changing_station", "tag-diaper"]);
-    if (yes(item.contactApp)) tags.push(["連絡アプリ", "smartphone", "tag-contactApp"]);
-    if (yes(item.medicalCare)) tags.push(["医療的ケア", "medical_services", "tag-medical"]);
-    return tags.slice(0, 6).map(([label, icon, kind]) =>
-      `<span class="feature-tag ${kind}"><span class="material-symbols-rounded tag-icon">${icon}</span>${safe(label)}</span>`
+    const list = [
+      { label: "園庭あり", icon: "yard", available: yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0 },
+      { label: "駐輪場所あり", icon: "pedal_bike", available: yes(item.bicycle) },
+      { label: "ベビーカー置場あり", icon: "stroller", available: yes(item.stroller) },
+      { label: "連絡アプリあり", icon: "smartphone", available: yes(item.contactApp) },
+      { label: "医ケア児受入あり", icon: "medical_services", available: yes(item.medicalCare) },
+      { label: "第三者評価あり", icon: "rate_review", available: Boolean(evaluationFor(item)) },
+    ];
+    return list.map(({ label, icon, available }) =>
+      `<span class="feature-tag ${available ? "tag-available" : "tag-unavailable"}"><span class="material-symbols-rounded tag-icon">${icon}</span>${safe(label)}</span>`
     ).join("");
   }
 
@@ -309,10 +303,16 @@
     const categoryLabels = { licensed: "認可", certified: "認証", unlicensed: "認可外（無償化対象）", other: "その他" };
     if (state.category !== "all") labels.push(categoryLabels[state.category]);
     state.areas.forEach((area) => labels.push(area));
-    labels.push(`${ageLabels[state.age]}入園`);
-    labels.push(`持ち点${state.userScore}点`);
     if (state.difficultyLevel) labels.push({ easy: "入りやすいのみ", normal: "普通のみ", hard: "入りにくいのみ", "no-data": "データなしのみ" }[state.difficultyLevel]);
-    const featureLabels = { garden: "園庭あり", bicycle: "駐輪あり", stroller: "ベビーカー置場", diaper: "おむつ準備負担少", contactApp: "連絡アプリ", medical: "医療的ケア児受入", evaluation: "第三者評価あり" };
+    const featureLabels = {
+      garden: "園庭あり",
+      bicycle: "駐輪場所あり",
+      stroller: "ベビーカー置場あり",
+      diaper: "おむつサブスク選択可能",
+      contactApp: "連絡アプリあり",
+      medical: "医ケア児受入あり",
+      evaluation: "第三者評価あり"
+    };
     state.features.forEach((feature) => labels.push(featureLabels[feature]));
     els.active.innerHTML = labels.map((label) => `<span class="filter-chip">${safe(label)}</span>`).join("");
   }

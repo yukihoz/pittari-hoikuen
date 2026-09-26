@@ -66,14 +66,15 @@
             <input type="range" min="38" max="43" step="1" value="40" data-score-input aria-label="保活指数（持ち点）" />
             <span class="score-scale" aria-hidden="true"><span>38点以下</span><span>39点</span><span class="standard-score">40点</span><span>41点</span><span>42点</span><span>43点以上</span></span>
           </label>
-          <button type="button" class="difficulty-help-button" data-open-difficulty>
-            <span class="material-symbols-rounded">help_outline</span>
-            <span>判定方法を見る</span>
-          </button>
         </fieldset>
 
         <fieldset class="primary-filter">
-          <legend><span class="material-symbols-rounded legend-icon">category</span>施設区分</legend>
+          <div class="legend-row">
+            <legend><span class="material-symbols-rounded legend-icon">category</span>施設区分</legend>
+            <button type="button" class="legend-action-button" data-open-difficulty>
+              <span class="material-symbols-rounded">help_outline</span>判定方法を見る
+            </button>
+          </div>
           <div class="segmented category-segmented" role="group" aria-label="施設区分">
             <button class="is-active" type="button" data-category="all">すべて</button>
             <button type="button" data-category="licensed">認可</button>
@@ -106,7 +107,7 @@
           <label class="check-row"><input type="checkbox" name="feature" value="garden" /><span class="material-symbols-rounded item-icon">yard</span>園庭あり</label>
           <label class="check-row"><input type="checkbox" name="feature" value="bicycle" /><span class="material-symbols-rounded item-icon">pedal_bike</span>駐輪スペースあり</label>
           <label class="check-row"><input type="checkbox" name="feature" value="stroller" /><span class="material-symbols-rounded item-icon">stroller</span>ベビーカー置場あり</label>
-          <label class="check-row"><input type="checkbox" name="feature" value="diaper" /><span class="material-symbols-rounded item-icon">baby_changing_station</span>園/サブスク</label>
+          <label class="check-row"><input type="checkbox" name="feature" value="diaper" /><span class="material-symbols-rounded item-icon">baby_changing_station</span>おむつサブスク選択可能</label>
           <label class="check-row"><input type="checkbox" name="feature" value="contactApp" /><span class="material-symbols-rounded item-icon">smartphone</span>連絡アプリあり</label>
           <label class="check-row"><input type="checkbox" name="feature" value="medical" /><span class="material-symbols-rounded item-icon">medical_services</span>医療的ケア児受入あり</label>
         </fieldset>
@@ -140,13 +141,14 @@
               <input type="range" min="38" max="43" step="1" value="40" data-score-input aria-label="保活指数（持ち点）" />
               <span class="score-scale" aria-hidden="true"><span>38点以下</span><span>39点</span><span class="standard-score">40点</span><span>41点</span><span>42点</span><span>43点以上</span></span>
             </label>
-            <button type="button" class="difficulty-help-button" data-open-difficulty>
-              <span class="material-symbols-rounded">help_outline</span>
-              <span>判定方法を見る</span>
-            </button>
           </fieldset>
           <fieldset class="top-filter-group">
-            <legend><span class="material-symbols-rounded legend-icon">category</span>施設区分</legend>
+            <div class="legend-row">
+              <legend><span class="material-symbols-rounded legend-icon">category</span>施設区分</legend>
+              <button type="button" class="legend-action-button" data-open-difficulty>
+                <span class="material-symbols-rounded">help_outline</span>判定方法を見る
+              </button>
+            </div>
             <div class="segmented category-segmented mobile-category" role="group" aria-label="施設区分">
               <button class="is-active" type="button" data-category="all">すべて</button>
               <button type="button" data-category="licensed">認可</button>
@@ -184,13 +186,14 @@
           </label>
         </div>
 
-        <div class="quick-filters" aria-label="よく使う条件">
-          <button type="button" data-quick="57d"><span class="material-symbols-rounded">cake</span>生後57日から</button>
-          <button type="button" data-quick="7m"><span class="material-symbols-rounded">cake</span>生後7か月から</button>
+        <div class="quick-filters" aria-label="設備・日々の負担">
           <button type="button" data-quick="garden"><span class="material-symbols-rounded">yard</span>園庭あり</button>
-          <button type="button" data-quick="diaper"><span class="material-symbols-rounded">baby_changing_station</span>おむつ準備が楽</button>
-          <button type="button" data-quick="contactApp"><span class="material-symbols-rounded">smartphone</span>連絡アプリ</button>
-          <button type="button" data-quick="evaluation"><span class="material-symbols-rounded">rate_review</span>第三者評価あり</button>
+          <button type="button" data-quick="bicycle"><span class="material-symbols-rounded">pedal_bike</span>駐輪スペースあり</button>
+          <button type="button" data-quick="stroller"><span class="material-symbols-rounded">stroller</span>ベビーカー置場あり</button>
+          <button type="button" data-quick="diaper"><span class="material-symbols-rounded">baby_changing_station</span>おむつサブスク選択可能</button>
+          <button type="button" data-quick="contactApp"><span class="material-symbols-rounded">smartphone</span>連絡アプリあり</button>
+          <button type="button" data-quick="medical"><span class="material-symbols-rounded">medical_services</span>医療的ケア児受入あり</button>
+          <button type="button" data-quick="evaluation"><span class="material-symbols-rounded">rate_review</span>福ナビ第三者評価あり</button>
         </div>
 
         <button class="mobile-filter-button" type="button" data-filter-open aria-controls="filter-panel" aria-expanded="false">
