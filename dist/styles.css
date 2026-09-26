@@ -165,32 +165,7 @@ a:hover {
   align-items: center;
   gap: 12px;
 }
-.header-result-meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 14px;
-  border: 1.5px solid var(--pink-soft);
-  border-radius: var(--radius-full);
-  background: var(--pink-light);
-  color: var(--ink-secondary);
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-.header-result-meta .meta-icon {
-  font-size: 18px;
-  color: var(--pink-primary);
-}
-.header-result-meta .result-count-label {
-  color: var(--muted);
-  font-size: 12px;
-}
-.header-result-meta strong {
-  font-size: 16px;
-  font-weight: 900;
-  color: var(--pink-deep);
-}
+
 .text-button {
   display: inline-flex;
   align-items: center;
@@ -972,31 +947,12 @@ select:focus {
 }
 
 /* Active Filter Chips */
-.active-filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  min-height: 28px;
-  margin-bottom: 14px;
-}
 .results-toolbar {
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  align-items: center;
+  justify-content: flex-end;
   gap: 12px;
-  margin: 14px 0;
-}
-.results-toolbar .active-filters {
-  flex: 1;
-  margin-bottom: 0;
-}
-.active-filters .filter-chip {
-  padding: 4px 10px;
-  border-color: transparent;
-  color: var(--pink-deep);
-  background: var(--pink-light);
-  font-size: 12px;
-  font-weight: 700;
+  margin: 14px 0 10px;
 }
 
 /* Results Grid & Cards */
@@ -1146,30 +1102,22 @@ select:focus {
 .difficulty-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
 }
 .difficulty-header-main {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 5px;
+  flex-wrap: wrap;
   min-width: 0;
 }
-.latest-target-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 2px 7px;
-  border-radius: var(--radius-sm);
-  background: #fff3c4;
-  border: 1px solid #d5aa13;
-  color: #7b5b00;
-  font-size: 10px;
-  font-weight: 800;
-  white-space: nowrap;
+.difficulty-header-icon {
+  font-size: 16px;
+  color: var(--pink-primary);
 }
-.age-label {
-  color: var(--ink-secondary);
+.difficulty-header-title {
+  color: var(--ink);
   font-size: 11px;
   font-weight: 800;
 }
@@ -2153,8 +2101,7 @@ footer button:hover {
   }
   .results-panel { order: 1; }
   .search-row { grid-template-columns: 1fr; gap: 10px; }
-  .results-toolbar { align-items: flex-end; flex-wrap: wrap; margin-bottom: 14px; }
-  .results-toolbar .active-filters:not(:empty) { flex-basis: 100%; }
+  .results-toolbar { align-items: center; justify-content: flex-end; flex-wrap: wrap; margin-bottom: 14px; }
   .results-toolbar .sort-controls { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr); width: 100%; margin-left: 0; }
   .results-toolbar .sort-box,
   .results-toolbar .sort-direction-box { width: 100%; min-width: 0; }

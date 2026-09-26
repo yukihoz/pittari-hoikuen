@@ -116,8 +116,11 @@
     }).join("");
     return `<div class="admission-status-box${detailed ? " admission-status-detail" : ""}">
       <div class="difficulty-header">
-        <span class="age-label">${safe(admissionAgeLabels[state.age])}</span>
-        <span class="difficulty-badge ${difficulty.badgeClass}"><span class="difficulty-dot" aria-hidden="true"></span>${safe(difficulty.label)}（R8）</span>
+        <div class="difficulty-header-main">
+          <span class="material-symbols-rounded difficulty-header-icon" aria-hidden="true">analytics</span>
+          <span class="difficulty-header-title">入園難易度の目安：</span>
+          <span class="difficulty-badge ${difficulty.badgeClass}"><span class="difficulty-dot" aria-hidden="true"></span>${safe(difficulty.label)}（R8）</span>
+        </div>
       </div>
       <div class="history-track" aria-label="過去の利用調整実績">${history}</div>
       ${detailed ? `<p class="difficulty-score-note">持ち点${state.userScore}点で判定しています。直近（令和8年度）の利用調整実績をもとにした目安であり、入園を保証するものではありません。</p>` : ""}
@@ -287,7 +290,7 @@
 
   function render() {
     const items = getFiltered();
-    els.count.textContent = items.length;
+    if (els.count) els.count.textContent = items.length;
     els.grid.replaceChildren(...items.map(renderCard));
     els.grid.hidden = items.length === 0;
     els.empty.hidden = items.length !== 0;
@@ -298,23 +301,7 @@
   }
 
   function renderActiveFilters() {
-    const labels = [];
-    if (state.query) labels.push(`検索: ${state.query}`);
-    const categoryLabels = { licensed: "認可", certified: "認証", unlicensed: "認可外（無償化対象）", other: "その他" };
-    if (state.category !== "all") labels.push(categoryLabels[state.category]);
-    state.areas.forEach((area) => labels.push(area));
-    if (state.difficultyLevel) labels.push({ easy: "入りやすいのみ", normal: "普通のみ", hard: "入りにくいのみ", "no-data": "データなしのみ" }[state.difficultyLevel]);
-    const featureLabels = {
-      garden: "園庭あり",
-      bicycle: "駐輪場所あり",
-      stroller: "ベビーカー置場あり",
-      diaper: "おむつサブスク選択可能",
-      contactApp: "連絡アプリあり",
-      medical: "医ケア児受入あり",
-      evaluation: "第三者評価あり"
-    };
-    state.features.forEach((feature) => labels.push(featureLabels[feature]));
-    els.active.innerHTML = labels.map((label) => `<span class="filter-chip">${safe(label)}</span>`).join("");
+    if (els.active) els.active.innerHTML = "";
   }
 
   function syncControls() {
