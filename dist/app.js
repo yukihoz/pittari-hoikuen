@@ -503,6 +503,8 @@
         <div class="note">${safe(item.note)}</div>
       </section>` : ""}`;
     els.detailDialog.showModal();
+    if (els.detailContent) els.detailContent.scrollTop = 0;
+    els.detailDialog.scrollTop = 0;
   }
 
   function toggleCompare(id, checked) {

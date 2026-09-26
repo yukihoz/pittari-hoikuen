@@ -471,8 +471,7 @@ legend {
 }
 .difficulty-dialog {
   width: min(680px, calc(100% - 24px));
-  max-height: min(88vh, 850px);
-  position: relative;
+  max-height: min(88dvh, 88vh, 850px);
 }
 .difficulty-dialog .dialog-close {
   position: absolute;
@@ -483,6 +482,7 @@ legend {
 .difficulty-dialog h2 {
   font-size: 22px;
   margin-bottom: 16px;
+  padding-right: 44px;
 }
 .difficulty-explanation p { margin: 0 0 8px; }
 .difficulty-explanation p:last-child { margin-bottom: 0; }
@@ -1389,8 +1389,11 @@ select:focus {
 
 /* Dialogs */
 dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
   width: min(760px, calc(100% - 24px));
-  max-height: min(88vh, 900px);
+  max-height: min(88dvh, 88vh, 900px);
   overflow: auto;
   border: 1.5px solid var(--line);
   border-radius: var(--radius-lg);
@@ -1400,19 +1403,19 @@ dialog {
   box-shadow: var(--shadow-lg);
 }
 .detail-dialog {
-  position: relative;
   overflow: hidden;
 }
 .detail-dialog #detail-content {
-  max-height: calc(min(88vh, 900px) - 64px);
+  max-height: calc(min(88dvh, 88vh, 900px) - 64px);
   overflow-y: auto;
   padding-right: 10px;
+  -webkit-overflow-scrolling: touch;
   scrollbar-gutter: stable;
 }
 .detail-dialog .dialog-close {
   position: absolute;
-  top: 32px;
-  right: 40px;
+  top: 24px;
+  right: 28px;
   float: none;
 }
 dialog::backdrop {
@@ -1478,6 +1481,9 @@ dialog h3 .material-symbols-rounded {
 .detail-hero {
   padding-bottom: 20px;
   border-bottom: 1px solid var(--line-light);
+}
+.detail-hero h2 {
+  padding-right: 48px;
 }
 .detail-links {
   display: flex;
@@ -2120,8 +2126,64 @@ footer button:hover {
   .evaluation-heading { display: block; }
   .evaluation-stats { grid-template-columns: 1fr 1fr; }
   .evaluation-themes { grid-template-columns: 1fr; }
-  dialog { padding: 22px 18px; }
+  dialog {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    width: calc(100% - 16px);
+    max-width: 600px;
+    max-height: min(92dvh, 92vh);
+    padding: 20px 14px 16px;
+    border-radius: var(--radius-lg);
+  }
+  .detail-dialog {
+    width: calc(100% - 16px);
+    max-width: 600px;
+    max-height: min(92dvh, 92vh);
+    padding: 20px 14px 16px;
+    overflow: hidden;
+  }
+  .detail-dialog #detail-content {
+    max-height: calc(min(92dvh, 92vh) - 36px);
+    overflow-y: auto;
+    padding-right: 4px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .detail-dialog .dialog-close {
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    font-size: 20px;
+  }
+  .difficulty-dialog {
+    width: calc(100% - 16px);
+    max-height: min(92dvh, 92vh);
+    padding: 20px 14px 16px;
+  }
+  .difficulty-dialog .dialog-close {
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    font-size: 20px;
+  }
+  .about-dialog {
+    width: calc(100% - 16px);
+    max-height: min(92dvh, 92vh);
+    padding: 20px 14px 16px;
+  }
+  .about-dialog .dialog-close {
+    top: 14px;
+    right: 14px;
+    width: 34px;
+    height: 34px;
+    font-size: 20px;
+  }
   .compare-dialog {
+    position: fixed;
+    inset: 0;
+    margin: auto;
     width: calc(100% - 8px);
     padding: 20px 8px 10px;
   }
@@ -2170,8 +2232,6 @@ footer button:hover {
     font-size: 11px;
   }
   .compare-detail-button .material-symbols-rounded { display: none; }
-  .detail-dialog #detail-content { max-height: calc(min(88vh, 900px) - 44px); padding-right: 6px; }
-  .detail-dialog .dialog-close { top: 22px; right: 24px; }
   footer { flex-direction: column; gap: 8px; text-align: center; }
 }
 
