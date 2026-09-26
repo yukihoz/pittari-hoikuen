@@ -246,6 +246,17 @@
   }
 
   function featureTags(item) {
+    // 認可園・こども園以外などで設備情報が存在しない施設の場合はアイコンを表示しない
+    const hasAnyFeatureData = Boolean(
+      item.gardenLabel ||
+      (item.gardenArea ?? 0) > 0 ||
+      present(item.bicycle) ||
+      present(item.stroller) ||
+      present(item.contactApp) ||
+      present(item.medicalCare)
+    );
+    if (!hasAnyFeatureData) return "";
+
     const list = [
       { label: "園庭あり", icon: "yard", available: yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0 },
       { label: "駐輪場所あり", icon: "pedal_bike", available: yes(item.bicycle) },
