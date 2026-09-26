@@ -55,7 +55,12 @@
         </fieldset>
 
         <fieldset class="primary-filter admission-settings">
-          <legend><span class="material-symbols-rounded legend-icon">analytics</span>入園難易度</legend>
+          <div class="legend-row">
+            <legend><span class="material-symbols-rounded legend-icon">analytics</span>入園難易度</legend>
+            <button type="button" class="legend-action-button" data-open-difficulty>
+              <span class="material-symbols-rounded">help_outline</span>判定方法を見る
+            </button>
+          </div>
           <label class="score-control">
             <span class="score-heading">保活指数（持ち点）<output data-score-output>40点</output></span>
             <input type="range" min="38" max="43" step="1" value="40" data-score-input aria-label="保活指数（持ち点）" />
@@ -64,12 +69,7 @@
         </fieldset>
 
         <fieldset class="primary-filter">
-          <div class="legend-row">
-            <legend><span class="material-symbols-rounded legend-icon">category</span>施設区分</legend>
-            <button type="button" class="legend-action-button" data-open-difficulty>
-              <span class="material-symbols-rounded">help_outline</span>判定方法を見る
-            </button>
-          </div>
+          <legend><span class="material-symbols-rounded legend-icon">category</span>施設区分</legend>
           <div class="segmented category-segmented" role="group" aria-label="施設区分">
             <button class="is-active" type="button" data-category="all">すべて</button>
             <button type="button" data-category="licensed">認可</button>
@@ -130,7 +130,12 @@
             </div>
           </fieldset>
           <fieldset class="top-filter-group admission-settings">
-            <legend><span class="material-symbols-rounded legend-icon">analytics</span>入園難易度</legend>
+            <div class="legend-row">
+              <legend><span class="material-symbols-rounded legend-icon">analytics</span>入園難易度</legend>
+              <button type="button" class="legend-action-button" data-open-difficulty>
+                <span class="material-symbols-rounded">help_outline</span>判定方法を見る
+              </button>
+            </div>
             <label class="score-control">
               <span class="score-heading">保活指数（持ち点）<output data-score-output>40点</output></span>
               <input type="range" min="38" max="43" step="1" value="40" data-score-input aria-label="保活指数（持ち点）" />
@@ -138,12 +143,7 @@
             </label>
           </fieldset>
           <fieldset class="top-filter-group">
-            <div class="legend-row">
-              <legend><span class="material-symbols-rounded legend-icon">category</span>施設区分</legend>
-              <button type="button" class="legend-action-button" data-open-difficulty>
-                <span class="material-symbols-rounded">help_outline</span>判定方法を見る
-              </button>
-            </div>
+            <legend><span class="material-symbols-rounded legend-icon">category</span>施設区分</legend>
             <div class="segmented category-segmented mobile-category" role="group" aria-label="施設区分">
               <button class="is-active" type="button" data-category="all">すべて</button>
               <button type="button" data-category="licensed">認可</button>
