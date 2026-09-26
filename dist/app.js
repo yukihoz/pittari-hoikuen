@@ -2,7 +2,7 @@
   const data = Array.isArray(window.NURSERY_DATA) ? window.NURSERY_DATA : [];
   const admissionData = Array.isArray(window.ADMISSION_DATA) ? window.ADMISSION_DATA : [];
   const evaluations = Array.isArray(window.FUKUNAVI_DATA) ? window.FUKUNAVI_DATA : [];
-  const state = { query: "", category: "all", areas: new Set(), age: "age1", userScore: 40, showEasyNormalOnly: false, features: new Set(), sort: "number", sortDirection: "asc", compare: new Set() };
+  const state = { query: "", category: "all", areas: new Set(), age: "age1", userScore: 40, difficultyLevel: null, showEasyNormalOnly: false, features: new Set(), sort: "number", sortDirection: "asc", compare: new Set() };
   const els = {
     grid: document.querySelector("#results-grid"),
     count: document.querySelector("#result-count"),
@@ -51,12 +51,30 @@
   };
   const facilityCategoryOrder = { licensed: 0, certified: 1, unlicensed: 2, other: 3 };
 
+  function getRecordDifficulty(userScore, record) {
+    if (record?.status === "vacant") return { level: "easy", label: "入りやすい", badgeClass: "badge-easy" };
+    if (!record || ["unopened", "full", "none", "unknown"].includes(record.status) || !record.score) {
+      return { level: "no-data", label: "データなし", badgeClass: "badge-nodata" };
+    }
+    const nurseryScore = Number.parseInt(String(record.score).replace(/[^0-9]/g, ""), 10);
+    const rank = record.rank || "";
+    if (!Number.isFinite(nurseryScore)) return { level: "no-data", label: "データなし", badgeClass: "badge-nodata" };
+    if (userScore > nurseryScore) return { level: "easy", label: "入りやすい", badgeClass: "badge-easy" };
+    if (userScore < nurseryScore) return { level: "hard", label: "入りにくい", badgeClass: "badge-hard" };
+    if (userScore === 40) {
+      if (["A", "B", "C"].includes(rank)) return { level: "hard", label: "入りにくい", badgeClass: "badge-hard" };
+      if (["D", "E", "F", "G"].includes(rank)) return { level: "normal", label: "普通", badgeClass: "badge-normal" };
+      return { level: "easy", label: "入りやすい", badgeClass: "badge-easy" };
+    }
+    return { level: "normal", label: "普通", badgeClass: "badge-normal" };
+  }
+
   function getAdmissionDifficulty(userScore, currentCapacity, historyRecords) {
     if (!(Number(currentCapacity) > 0)) {
       return { level: "none", label: "今年度枠なし", badgeClass: "badge-none", isAvailableThisYear: false };
     }
-    const latestRecord = historyRecords?.["2025"];
-    const is3YearsVacant = ["2025", "2024", "2023"].every((year) => historyRecords?.[year]?.status === "vacant");
+    const latestRecord = historyRecords?.["2026"] || historyRecords?.["2025"];
+    const is3YearsVacant = ["2026", "2025", "2024"].every((year) => historyRecords?.[year]?.status === "vacant");
     if (is3YearsVacant) {
       return { level: "easy", label: "入りやすい", subtext: "3年連続空き枠あり", badgeClass: "badge-easy", isAvailableThisYear: true };
     }
@@ -68,19 +86,7 @@
       const isNew = latestRecord?.status === "unopened";
       return { level: "no-data", label: isNew ? "新設園（実績なし）" : "前回データなし", subtext: isNew ? "今年度新規開園" : "今年度受入枠あり", badgeClass: "badge-nodata", isAvailableThisYear: true };
     }
-    const nurseryScore = Number.parseInt(String(latestRecord.score).replace(/[^0-9]/g, ""), 10);
-    const rank = latestRecord.rank || "";
-    if (!Number.isFinite(nurseryScore)) {
-      return { level: "no-data", label: "前回データなし", subtext: "今年度受入枠あり", badgeClass: "badge-nodata", isAvailableThisYear: true };
-    }
-    if (userScore > nurseryScore) return { level: "easy", label: "入りやすい", badgeClass: "badge-easy", isAvailableThisYear: true };
-    if (userScore < nurseryScore) return { level: "hard", label: "入りにくい", badgeClass: "badge-hard", isAvailableThisYear: true };
-    if (userScore === 40) {
-      if (["A", "B", "C"].includes(rank)) return { level: "hard", label: "入りにくい", subtext: "40点上位層のみ内定", badgeClass: "badge-hard", isAvailableThisYear: true };
-      if (["D", "E", "F", "G"].includes(rank)) return { level: "normal", label: "普通", subtext: "40点届くかやや不確か", badgeClass: "badge-normal", isAvailableThisYear: true };
-      return { level: "easy", label: "入りやすい", subtext: "40点でも届きやすい", badgeClass: "badge-easy", isAvailableThisYear: true };
-    }
-    return { level: "normal", label: "普通", badgeClass: "badge-normal", isAvailableThisYear: true };
+    return { ...getRecordDifficulty(userScore, latestRecord), isAvailableThisYear: true };
   }
 
   const difficultyFor = (item) => getAdmissionDifficulty(state.userScore, item.capacity?.[state.age], admissionFor(item)?.ages?.[state.age]?.years);
@@ -100,15 +106,18 @@
     if (!hasAdmissionInformation(item)) return "";
     const difficulty = difficultyFor(item);
     const years = admissionFor(item)?.ages?.[state.age]?.years || {};
-    const historyYears = detailed ? ["2022", "2023", "2024", "2025"] : ["2023", "2024", "2025"];
-    const eraLabels = { "2025": "R7", "2024": "R6", "2023": "R5", "2022": "R4" };
-    const history = historyYears.map((year) => `<span class="history-item${year === "2025" ? " latest" : ""}"><span>${eraLabels[year]}</span><strong>${safe(historyValue(years[year]))}</strong></span>`).join("");
+    const historyYears = detailed ? ["2022", "2023", "2024", "2025", "2026"] : ["2024", "2025", "2026"];
+    const eraLabels = { "2026": "R8", "2025": "R7", "2024": "R6", "2023": "R5", "2022": "R4" };
+    const history = historyYears.map((year) => {
+      const yearlyDifficulty = getRecordDifficulty(state.userScore, years[year]);
+      const latest = year === "2026";
+      return `<span class="history-item history-${yearlyDifficulty.level}${latest ? " latest" : ""}" title="持ち点${state.userScore}点での${eraLabels[year]}実績の判定：${safe(yearlyDifficulty.label)}"><span>${eraLabels[year]}${latest ? "<em>直近・判定対象</em>" : ""}</span><strong>${safe(historyValue(years[year]))}</strong></span>`;
+    }).join("");
     return `<div class="admission-status-box${detailed ? " admission-status-detail" : ""}">
       <div class="difficulty-header">
         <span class="age-label">${safe(admissionAgeLabels[state.age])}</span>
         <span class="difficulty-badge ${difficulty.badgeClass}"><span class="difficulty-dot" aria-hidden="true"></span>${safe(difficulty.label)}</span>
       </div>
-      ${difficulty.subtext ? `<p class="difficulty-subtext">${safe(difficulty.subtext)}</p>` : ""}
       <div class="history-track" aria-label="過去の利用調整実績">${history}</div>
       ${detailed ? `<p class="difficulty-score-note">持ち点${state.userScore}点で判定しています。直近の利用調整実績をもとにした目安であり、入園を保証するものではありません。</p>` : ""}
     </div>`;
@@ -117,8 +126,8 @@
   function admissionDifficultyExplanation() {
     return `<div class="difficulty-explanation">
       <h4><span class="material-symbols-rounded" aria-hidden="true">lightbulb</span>入園難易度（入りやすい / 普通 / 入りにくい）の判定について</h4>
-      <p>前回（2026年2月）の利用調整結果のデータを元に、簡易的に入園のしやすさを3段階で表示しています。</p>
-      <p>前回の最終内定順位（A〜P）と最低指数をもとに、以下のように判定しています：</p>
+      <p>直近（2026年2月公表・令和8年度）の利用調整結果のデータを元に、簡易的に入園のしやすさを3段階で表示しています。</p>
+      <p>直近の最終内定順位（A〜P）と最低指数をもとに、以下のように判定しています：</p>
       <section class="difficulty-rule rule-easy">
         <h5><span class="difficulty-dot" aria-hidden="true"></span>入りやすい</h5>
         <ul>
@@ -146,7 +155,7 @@
       <hr>
       <h5 class="difficulty-question">Q. なぜ同じ「40点」の園でも判定が分かれるの？</h5>
       <p>中央区では、両親フルタイム共働き（基本点20点＋20点＝40点）のご家庭が申込者の大半を占めています。<br>そのため、多くの園で最低指数が「40点」で並び、同点内での優先順位（居住歴や兄弟在園など）によって合否が決まります。<br>この部分をもう少し詳細に見極めるために、40点の場合には内定順位を上位（A〜C：1位から150位）、中位（D〜G：151位から350位）、下位（H〜P：351位から800位）の3段階に分けて上記の判定を行っています。</p>
-      <p class="difficulty-note">※この判定は直近2026年2月の4月第1回利用調整実績をもとにした目安です。毎年の申込倍率や募集定員によって変動します。</p>
+      <p class="difficulty-note">※この判定は直近2026年2月公表の令和8年度4月第1回利用調整実績をもとにした目安です。毎年の申込倍率や募集定員によって変動します。</p>
     </div>`;
   }
 
@@ -177,6 +186,7 @@
   function getFiltered() {
     const filtered = data.filter((item) => {
       if (!matchesCurrentFilters(item)) return false;
+      if (state.difficultyLevel) return hasAdmissionInformation(item) && difficultyFor(item).level === state.difficultyLevel;
       if (!state.showEasyNormalOnly) return true;
       if (!hasAdmissionInformation(item)) return false;
       return ["easy", "normal", "no-data"].includes(difficultyFor(item).level);
@@ -213,10 +223,10 @@
     });
     els.admissionSummary.innerHTML = `<div class="admission-summary-heading"><span><span class="material-symbols-rounded">analytics</span>${safe(admissionAgeLabels[state.age])}・持ち点${state.userScore}点の目安</span><small>認可園を集計</small></div>
       <div class="admission-summary-counts">
-        <span class="summary-easy"><span class="difficulty-dot" aria-hidden="true"></span>入りやすい <strong>${counts.easy}園</strong></span>
-        <span class="summary-normal"><span class="difficulty-dot" aria-hidden="true"></span>普通 <strong>${counts.normal}園</strong></span>
-        <span class="summary-hard"><span class="difficulty-dot" aria-hidden="true"></span>入りにくい <strong>${counts.hard}園</strong></span>
-        <span class="summary-nodata"><span class="difficulty-dot" aria-hidden="true"></span>前回データなし <strong>${counts["no-data"]}園</strong></span>
+        <button type="button" class="summary-easy${state.difficultyLevel === "easy" ? " is-active" : ""}" data-difficulty-level="easy" aria-pressed="${state.difficultyLevel === "easy"}"><span class="difficulty-dot" aria-hidden="true"></span>入りやすい <strong>${counts.easy}園</strong></button>
+        <button type="button" class="summary-normal${state.difficultyLevel === "normal" ? " is-active" : ""}" data-difficulty-level="normal" aria-pressed="${state.difficultyLevel === "normal"}"><span class="difficulty-dot" aria-hidden="true"></span>普通 <strong>${counts.normal}園</strong></button>
+        <button type="button" class="summary-hard${state.difficultyLevel === "hard" ? " is-active" : ""}" data-difficulty-level="hard" aria-pressed="${state.difficultyLevel === "hard"}"><span class="difficulty-dot" aria-hidden="true"></span>入りにくい <strong>${counts.hard}園</strong></button>
+        <button type="button" class="summary-nodata${state.difficultyLevel === "no-data" ? " is-active" : ""}" data-difficulty-level="no-data" aria-pressed="${state.difficultyLevel === "no-data"}"><span class="difficulty-dot" aria-hidden="true"></span>前回データなし <strong>${counts["no-data"]}園</strong></button>
       </div>`;
   }
 
@@ -289,6 +299,7 @@
     state.areas.forEach((area) => labels.push(area));
     labels.push(`${ageLabels[state.age]}入園`);
     labels.push(`持ち点${state.userScore}点`);
+    if (state.difficultyLevel) labels.push({ easy: "入りやすいのみ", normal: "普通のみ", hard: "入りにくいのみ", "no-data": "前回データなしのみ" }[state.difficultyLevel]);
     if (state.showEasyNormalOnly) labels.push("入りやすい・普通のみ");
     const featureLabels = { garden: "園庭あり", bicycle: "駐輪あり", stroller: "ベビーカー置場", diaper: "おむつ準備負担少", contactApp: "連絡アプリ", medical: "医療的ケア児受入", evaluation: "第三者評価あり" };
     state.features.forEach((feature) => labels.push(featureLabels[feature]));
@@ -326,7 +337,7 @@
   }
 
   function reset() {
-    state.query = ""; state.category = "all"; state.areas.clear(); state.age = "age1"; state.userScore = 40; state.showEasyNormalOnly = false; state.features.clear(); state.sort = "number"; state.sortDirection = "asc";
+    state.query = ""; state.category = "all"; state.areas.clear(); state.age = "age1"; state.userScore = 40; state.difficultyLevel = null; state.showEasyNormalOnly = false; state.features.clear(); state.sort = "number"; state.sortDirection = "asc";
     els.search.value = "";
     render();
   }
@@ -601,6 +612,7 @@
         state.age = value.age ?? "age1";
         if (value.userScore !== undefined && (!Number.isInteger(value.userScore) || value.userScore < 38 || value.userScore > 43)) throw new Error("userScoreが不正です");
         state.userScore = value.userScore ?? 40;
+        state.difficultyLevel = null;
         state.showEasyNormalOnly = value.showEasyNormalOnly ?? false;
         state.features = new Set(value.features ?? []);
         state.sort = value.sort ?? "number";
@@ -621,7 +633,15 @@
   document.querySelectorAll("[data-category]").forEach((button) => button.addEventListener("click", () => { state.category = button.dataset.category; render(); }));
   document.querySelectorAll("[data-age]").forEach((button) => button.addEventListener("click", () => { state.age = button.dataset.age; render(); }));
   els.scoreInputs.forEach((input) => input.addEventListener("input", () => { state.userScore = Number(input.value); render(); }));
-  els.difficultyFilters.forEach((input) => input.addEventListener("change", () => { state.showEasyNormalOnly = input.checked; render(); }));
+  els.difficultyFilters.forEach((input) => input.addEventListener("change", () => { state.difficultyLevel = null; state.showEasyNormalOnly = input.checked; render(); }));
+  els.admissionSummary.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-difficulty-level]");
+    if (!button) return;
+    const level = button.dataset.difficultyLevel;
+    state.difficultyLevel = state.difficultyLevel === level ? null : level;
+    state.showEasyNormalOnly = false;
+    render();
+  });
   document.querySelectorAll('input[name="area"]').forEach((input) => input.addEventListener("change", () => { input.checked ? state.areas.add(input.value) : state.areas.delete(input.value); render(); }));
   document.querySelectorAll('input[name="feature"]').forEach((input) => input.addEventListener("change", () => { input.checked ? state.features.add(input.value) : state.features.delete(input.value); render(); }));
   document.querySelectorAll("[data-quick]").forEach((button) => button.addEventListener("click", () => {

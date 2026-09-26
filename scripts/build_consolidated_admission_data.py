@@ -26,7 +26,7 @@ with open('/tmp/extracted_admission_index.json', encoding='utf-8') as f:
 
 # 年度ごとの正規化名マップ
 maps_by_year = {}
-for yr in ['2022', '2023', '2024', '2025']:
+for yr in ['2022', '2023', '2024', '2025', '2026']:
     m = {}
     for item in extracted_by_year[yr]:
         m[norm(item['name'])] = item
@@ -60,12 +60,13 @@ AGE_KEYS = [
     ('age5', '5歳児')
 ]
 
-YEARS = ['2022', '2023', '2024', '2025']
+YEARS = ['2022', '2023', '2024', '2025', '2026']
 YEAR_LABELS = {
     '2022': '令和4年(2022)',
     '2023': '令和5年(2023)',
     '2024': '令和6年(2024)',
-    '2025': '令和7年(2025)'
+    '2025': '令和7年(2025)',
+    '2026': '令和8年(2026)'
 }
 
 consolidated = []
@@ -247,6 +248,7 @@ with open(csv_file, 'w', encoding='utf-8-sig', newline='') as f:
         '令和5年(2023)実績', '令和5年_順位', '令和5年_最低指数', '令和5年_状況',
         '令和6年(2024)実績', '令和6年_順位', '令和6年_最低指数', '令和6年_状況',
         '令和7年(2025)実績', '令和7年_順位', '令和7年_最低指数', '令和7年_状況',
+        '令和8年(2026)実績', '令和8年_順位', '令和8年_最低指数', '令和8年_状況',
         '0歳児合同募集備考'
     ])
     
@@ -258,6 +260,7 @@ with open(csv_file, 'w', encoding='utf-8-sig', newline='') as f:
             y23 = age_info['years'].get('2023', {})
             y24 = age_info['years'].get('2024', {})
             y25 = age_info['years'].get('2025', {})
+            y26 = age_info['years'].get('2026', {})
             
             merged_note = ''
             if age_key in ['57d', '7m']:
@@ -271,6 +274,7 @@ with open(csv_file, 'w', encoding='utf-8-sig', newline='') as f:
                 y23.get('display', '-'), y23.get('rank') or '', y23.get('score') or '', y23.get('status_label', ''),
                 y24.get('display', '-'), y24.get('rank') or '', y24.get('score') or '', y24.get('status_label', ''),
                 y25.get('display', '-'), y25.get('rank') or '', y25.get('score') or '', y25.get('status_label', ''),
+                y26.get('display', '-'), y26.get('rank') or '', y26.get('score') or '', y26.get('status_label', ''),
                 merged_note
             ])
 

@@ -64,6 +64,21 @@ CONFIGS = {
             'age5': (855.8, 924.5),
         },
         'p1_min_y': 690
+    },
+    '2026': {
+        'pdf': 'data/pdf/r08_04.pdf',
+        'svg_prefix': 'r08',
+        'cols': {
+            'name': (156.1, 444.1),
+            '57d': (444.1, 512.3),
+            '7m': (512.3, 581.0),
+            'age1': (581.0, 649.7),
+            'age2': (649.7, 718.4),
+            'age3': (718.4, 787.1),
+            'age4': (787.1, 855.8),
+            'age5': (855.8, 924.5),
+        },
+        'p1_min_y': 690
     }
 }
 
@@ -251,7 +266,7 @@ def parse_cell_content(txt, has_diag, has_gray):
 
 def main():
     results = {}
-    for yr in ['2022', '2023', '2024', '2025']:
+    for yr in ['2022', '2023', '2024', '2025', '2026']:
         yr_rows = []
         for p in [1, 2, 3, 4]:
             yr_rows.extend(parse_page(yr, p))
