@@ -2,7 +2,7 @@
   const data = Array.isArray(window.NURSERY_DATA) ? window.NURSERY_DATA : [];
   const admissionData = Array.isArray(window.ADMISSION_DATA) ? window.ADMISSION_DATA : [];
   const evaluations = Array.isArray(window.FUKUNAVI_DATA) ? window.FUKUNAVI_DATA : [];
-  const state = { query: "", category: "all", areas: new Set(), age: "age1", userScore: 40, difficultyLevel: null, showEasyNormalOnly: false, features: new Set(), sort: "number", sortDirection: "asc", compare: new Set() };
+  const state = { query: "", category: "all", areas: new Set(), age: "age1", userScore: 40, difficultyLevel: null, features: new Set(), sort: "number", sortDirection: "asc", compare: new Set() };
   const els = {
     grid: document.querySelector("#results-grid"),
     count: document.querySelector("#result-count"),
@@ -17,6 +17,8 @@
     detailContent: document.querySelector("#detail-content"),
     compareDialog: document.querySelector("#compare-dialog"),
     compareContent: document.querySelector("#compare-content"),
+    difficultyDialog: document.querySelector("#difficulty-dialog"),
+    difficultyDialogContent: document.querySelector("#difficulty-dialog-content"),
     aboutDialog: document.querySelector("#about-dialog"),
     template: document.querySelector("#card-template"),
     filterPanel: document.querySelector("#filter-panel"),
@@ -26,7 +28,6 @@
     admissionSummary: document.querySelector("#admission-summary"),
     scoreInputs: document.querySelectorAll("[data-score-input]"),
     scoreOutputs: document.querySelectorAll("[data-score-output]"),
-    difficultyFilters: document.querySelectorAll("[data-difficulty-filter]"),
   };
 
   const normalized = (value) => String(value ?? "").normalize("NFKC").toLowerCase().replace(/\s+/g, "");
@@ -84,7 +85,7 @@
     const isNoPastData = !latestRecord || ["unopened", "full", "none", "unknown"].includes(latestRecord.status) || !latestRecord.score;
     if (isNoPastData) {
       const isNew = latestRecord?.status === "unopened";
-      return { level: "no-data", label: isNew ? "新設園（実績なし）" : "前回データなし", subtext: isNew ? "今年度新規開園" : "今年度受入枠あり", badgeClass: "badge-nodata", isAvailableThisYear: true };
+      return { level: "no-data", label: isNew ? "新設園（実績なし）" : "データなし", subtext: isNew ? "今年度新規開園" : "今年度受入枠あり", badgeClass: "badge-nodata", isAvailableThisYear: true };
     }
     return { ...getRecordDifficulty(userScore, latestRecord), isAvailableThisYear: true };
   }
@@ -111,12 +112,15 @@
     const history = historyYears.map((year) => {
       const yearlyDifficulty = getRecordDifficulty(state.userScore, years[year]);
       const latest = year === "2026";
-      return `<span class="history-item history-${yearlyDifficulty.level}${latest ? " latest" : ""}" title="持ち点${state.userScore}点での${eraLabels[year]}実績の判定：${safe(yearlyDifficulty.label)}"><span>${eraLabels[year]}${latest ? "<em>直近・判定対象</em>" : ""}</span><strong>${safe(historyValue(years[year]))}</strong></span>`;
+      return `<span class="history-item history-${yearlyDifficulty.level}${latest ? " latest" : ""}" title="持ち点${state.userScore}点での${eraLabels[year]}実績の判定：${safe(yearlyDifficulty.label)}"><span>${eraLabels[year]}</span><strong>${safe(historyValue(years[year]))}</strong></span>`;
     }).join("");
     return `<div class="admission-status-box${detailed ? " admission-status-detail" : ""}">
       <div class="difficulty-header">
-        <span class="age-label">${safe(admissionAgeLabels[state.age])}</span>
-        <span class="difficulty-badge ${difficulty.badgeClass}"><span class="difficulty-dot" aria-hidden="true"></span>${safe(difficulty.label)}</span>
+        <div class="difficulty-header-main">
+          <span class="age-label">${safe(admissionAgeLabels[state.age])}</span>
+          <span class="difficulty-badge ${difficulty.badgeClass}"><span class="difficulty-dot" aria-hidden="true"></span>${safe(difficulty.label)}</span>
+        </div>
+        <span class="latest-target-badge">直近・判定対象</span>
       </div>
       <div class="history-track" aria-label="過去の利用調整実績">${history}</div>
       ${detailed ? `<p class="difficulty-score-note">持ち点${state.userScore}点で判定しています。直近の利用調整実績をもとにした目安であり、入園を保証するものではありません。</p>` : ""}
@@ -150,6 +154,12 @@
           <li><strong>【40点の場合】</strong>内定順位が上位（A〜C位）で埋まっている（40点の中で上位層のみ内定）</li>
         </ul>
       </section>
+      <section class="difficulty-rule rule-nodata">
+        <h5><span class="difficulty-dot" aria-hidden="true"></span>データなし</h5>
+        <ul>
+          <li>直近の選考で受入枠がなかった、または公表資料に対象年齢の最低指数記載がない園</li>
+        </ul>
+      </section>
       <h5 class="difficulty-question">Q. なぜ持ち点によって判定が変わるの？</h5>
       <p>中央区の認可保育園選考では、ご家庭の就労状況などに応じた「指数（点数）」が高い順に内定が決まります。<br>そのため、同じ保育園でも「ご自身の持ち点が何点か」によって、受かりやすさは大きく変わります。スライダーをお手元の持ち点に合わせることで、各園の難易度がリアルタイムに切り替わります。</p>
       <hr>
@@ -159,6 +169,9 @@
     </div>`;
   }
 
+  if (els.difficultyDialogContent) {
+    els.difficultyDialogContent.innerHTML = admissionDifficultyExplanation();
+  }
   document.querySelectorAll("[data-difficulty-explanation]").forEach((element) => {
     element.innerHTML = admissionDifficultyExplanation();
   });
@@ -187,9 +200,7 @@
     const filtered = data.filter((item) => {
       if (!matchesCurrentFilters(item)) return false;
       if (state.difficultyLevel) return hasAdmissionInformation(item) && difficultyFor(item).level === state.difficultyLevel;
-      if (!state.showEasyNormalOnly) return true;
-      if (!hasAdmissionInformation(item)) return false;
-      return ["easy", "normal", "no-data"].includes(difficultyFor(item).level);
+      return true;
     });
     const direction = state.sortDirection === "desc" ? -1 : 1;
     filtered.sort((a, b) => {
@@ -226,7 +237,7 @@
         <button type="button" class="summary-easy${state.difficultyLevel === "easy" ? " is-active" : ""}" data-difficulty-level="easy" aria-pressed="${state.difficultyLevel === "easy"}"><span class="difficulty-dot" aria-hidden="true"></span>入りやすい <strong>${counts.easy}園</strong></button>
         <button type="button" class="summary-normal${state.difficultyLevel === "normal" ? " is-active" : ""}" data-difficulty-level="normal" aria-pressed="${state.difficultyLevel === "normal"}"><span class="difficulty-dot" aria-hidden="true"></span>普通 <strong>${counts.normal}園</strong></button>
         <button type="button" class="summary-hard${state.difficultyLevel === "hard" ? " is-active" : ""}" data-difficulty-level="hard" aria-pressed="${state.difficultyLevel === "hard"}"><span class="difficulty-dot" aria-hidden="true"></span>入りにくい <strong>${counts.hard}園</strong></button>
-        <button type="button" class="summary-nodata${state.difficultyLevel === "no-data" ? " is-active" : ""}" data-difficulty-level="no-data" aria-pressed="${state.difficultyLevel === "no-data"}"><span class="difficulty-dot" aria-hidden="true"></span>前回データなし <strong>${counts["no-data"]}園</strong></button>
+        <button type="button" class="summary-nodata${state.difficultyLevel === "no-data" ? " is-active" : ""}" data-difficulty-level="no-data" aria-pressed="${state.difficultyLevel === "no-data"}"><span class="difficulty-dot" aria-hidden="true"></span>データなし <strong>${counts["no-data"]}園</strong></button>
       </div>`;
   }
 
@@ -237,16 +248,17 @@
   function featureTags(item) {
     const tags = [];
     const evaluation = evaluationFor(item);
-    if (evaluation) tags.push(["第三者評価あり", "rate_review", true]);
-    if (yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0) tags.push(["園庭", "yard", false, "garden"]);
-    if ((item.capacity?.["57d"] ?? 0) > 0) tags.push(["生後57日", "cake", true]);
-    else if ((item.capacity?.["7m"] ?? 0) > 0) tags.push(["生後7か月", "cake", true]);
-    if (yes(item.bicycle)) tags.push(["駐輪", "pedal_bike", false]);
-    if (yes(item.stroller)) tags.push(["ベビーカー", "stroller", false]);
-    if (/園|サブスク/.test(item.diaperPrep ?? "") && !/保護者\s*$/.test(item.diaperPrep ?? "")) tags.push(["おむつ楽", "baby_changing_station", true]);
-    if (yes(item.contactApp)) tags.push(["連絡アプリ", "smartphone", false]);
-    return tags.slice(0, 5).map(([label, icon, accent, kind]) =>
-      `<span class="feature-tag${accent ? " accent" : ""}${kind ? ` ${kind}` : ""}"><span class="material-symbols-rounded tag-icon">${icon}</span>${safe(label)}</span>`
+    if (evaluation) tags.push(["第三者評価あり", "rate_review", "tag-evaluation"]);
+    if (yes(item.gardenLabel) || (item.gardenArea ?? 0) > 0) tags.push(["園庭あり", "yard", "tag-garden"]);
+    if ((item.capacity?.["57d"] ?? 0) > 0) tags.push(["生後57日", "cake", "tag-age0"]);
+    else if ((item.capacity?.["7m"] ?? 0) > 0) tags.push(["生後7か月", "cake", "tag-age0"]);
+    if (yes(item.bicycle)) tags.push(["駐輪あり", "pedal_bike", "tag-bicycle"]);
+    if (yes(item.stroller)) tags.push(["ベビーカー", "stroller", "tag-stroller"]);
+    if (/園|サブスク/.test(item.diaperPrep ?? "") && !/保護者\s*$/.test(item.diaperPrep ?? "")) tags.push(["おむつ楽", "baby_changing_station", "tag-diaper"]);
+    if (yes(item.contactApp)) tags.push(["連絡アプリ", "smartphone", "tag-contactApp"]);
+    if (yes(item.medicalCare)) tags.push(["医療的ケア", "medical_services", "tag-medical"]);
+    return tags.slice(0, 6).map(([label, icon, kind]) =>
+      `<span class="feature-tag ${kind}"><span class="material-symbols-rounded tag-icon">${icon}</span>${safe(label)}</span>`
     ).join("");
   }
 
@@ -299,8 +311,7 @@
     state.areas.forEach((area) => labels.push(area));
     labels.push(`${ageLabels[state.age]}入園`);
     labels.push(`持ち点${state.userScore}点`);
-    if (state.difficultyLevel) labels.push({ easy: "入りやすいのみ", normal: "普通のみ", hard: "入りにくいのみ", "no-data": "前回データなしのみ" }[state.difficultyLevel]);
-    if (state.showEasyNormalOnly) labels.push("入りやすい・普通のみ");
+    if (state.difficultyLevel) labels.push({ easy: "入りやすいのみ", normal: "普通のみ", hard: "入りにくいのみ", "no-data": "データなしのみ" }[state.difficultyLevel]);
     const featureLabels = { garden: "園庭あり", bicycle: "駐輪あり", stroller: "ベビーカー置場", diaper: "おむつ準備負担少", contactApp: "連絡アプリ", medical: "医療的ケア児受入", evaluation: "第三者評価あり" };
     state.features.forEach((feature) => labels.push(featureLabels[feature]));
     els.active.innerHTML = labels.map((label) => `<span class="filter-chip">${safe(label)}</span>`).join("");
@@ -313,7 +324,6 @@
     document.querySelectorAll('input[name="feature"]').forEach((input) => { input.checked = state.features.has(input.value); });
     els.scoreInputs.forEach((input) => { input.value = String(state.userScore); });
     els.scoreOutputs.forEach((output) => { output.textContent = `${state.userScore}点`; });
-    els.difficultyFilters.forEach((input) => { input.checked = state.showEasyNormalOnly; });
     document.querySelectorAll("[data-quick]").forEach((button) => {
       const value = button.dataset.quick;
       button.classList.toggle("is-active", value === state.age || state.features.has(value));
@@ -337,7 +347,7 @@
   }
 
   function reset() {
-    state.query = ""; state.category = "all"; state.areas.clear(); state.age = "age1"; state.userScore = 40; state.difficultyLevel = null; state.showEasyNormalOnly = false; state.features.clear(); state.sort = "number"; state.sortDirection = "asc";
+    state.query = ""; state.category = "all"; state.areas.clear(); state.age = "age1"; state.userScore = 40; state.difficultyLevel = null; state.features.clear(); state.sort = "number"; state.sortDirection = "asc";
     els.search.value = "";
     render();
   }
@@ -593,7 +603,6 @@
           sort: { type: "string", enum: allowed.sort },
           sortDirection: { type: "string", enum: allowed.sortDirection },
           userScore: { type: "integer", minimum: 38, maximum: 43, description: "保活指数（持ち点）" },
-          showEasyNormalOnly: { type: "boolean", description: "入りやすい・普通・前回データなしの園だけを表示" },
         },
         additionalProperties: false,
       },
@@ -613,7 +622,6 @@
         if (value.userScore !== undefined && (!Number.isInteger(value.userScore) || value.userScore < 38 || value.userScore > 43)) throw new Error("userScoreが不正です");
         state.userScore = value.userScore ?? 40;
         state.difficultyLevel = null;
-        state.showEasyNormalOnly = value.showEasyNormalOnly ?? false;
         state.features = new Set(value.features ?? []);
         state.sort = value.sort ?? "number";
         state.sortDirection = value.sortDirection ?? "asc";
@@ -633,13 +641,11 @@
   document.querySelectorAll("[data-category]").forEach((button) => button.addEventListener("click", () => { state.category = button.dataset.category; render(); }));
   document.querySelectorAll("[data-age]").forEach((button) => button.addEventListener("click", () => { state.age = button.dataset.age; render(); }));
   els.scoreInputs.forEach((input) => input.addEventListener("input", () => { state.userScore = Number(input.value); render(); }));
-  els.difficultyFilters.forEach((input) => input.addEventListener("change", () => { state.difficultyLevel = null; state.showEasyNormalOnly = input.checked; render(); }));
   els.admissionSummary.addEventListener("click", (event) => {
     const button = event.target.closest("[data-difficulty-level]");
     if (!button) return;
     const level = button.dataset.difficultyLevel;
     state.difficultyLevel = state.difficultyLevel === level ? null : level;
-    state.showEasyNormalOnly = false;
     render();
   });
   document.querySelectorAll('input[name="area"]').forEach((input) => input.addEventListener("change", () => { input.checked ? state.areas.add(input.value) : state.areas.delete(input.value); render(); }));
@@ -656,6 +662,7 @@
   document.addEventListener("keydown", (event) => { if (event.key === "Escape" && els.filterPanel.classList.contains("is-open")) setFilterOpen(false); });
   filterMedia.addEventListener?.("change", () => setFilterOpen(false, false));
   document.querySelectorAll("[data-open-about]").forEach((button) => button.addEventListener("click", () => els.aboutDialog.showModal()));
+  document.querySelectorAll("[data-open-difficulty]").forEach((button) => button.addEventListener("click", () => els.difficultyDialog.showModal()));
   document.querySelectorAll("[data-close]").forEach((button) => button.addEventListener("click", () => button.closest("dialog").close()));
   document.querySelectorAll("dialog").forEach((dialog) => dialog.addEventListener("click", (event) => { if (event.target === dialog) dialog.close(); }));
   document.querySelector("#open-compare").addEventListener("click", showCompare);
