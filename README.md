@@ -5,8 +5,17 @@
 > 同様の課題を抱える他自治体（市区町村）のシビックテック、自治体職員、議員、市民エンジニアがゼロから立ち上げ・横展開できるよう、システム設計・具体的な情報ソース・データ収集パイプラインをすべて公開しています。
 
 [![GitHub Pages](https://img.shields.io/badge/GitHub%20Pages-Live%20Demo-brightgreen)](https://yukihoz.github.io/pittari-hoikuen/)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Code License](https://img.shields.io/badge/Code%20License-MIT-blue.svg)](LICENSE)
+[![Data License](https://img.shields.io/badge/Data%20License-Terms%20Apply-lightgrey)](DATA_LICENSE.md)
 [![Civic Tech](https://img.shields.io/badge/Civic%20Tech-Code%20for%20Chuo-orange)](https://github.com/yukihoz/pittari-hoikuen)
+
+---
+
+### 🚀 自分の自治体版を作る（Quick Start）
+本システムはサーバーやDBが一切不要な完全静的SPA（Single Page Application）のため、**ご自身の自治体の保育園データに差し替えるだけで誰でも無料（GitHub Pages / Cloudflare Pages等）で開設可能**です。
+
+* 📖 **詳細ガイド**: [CUSTOMIZE.md](CUSTOMIZE.md)（変更箇所・必要データ・手順を集約）
+* 🤖 **AIでの簡単構築**: Codex、Claude Code、Antigravity等のAIコーディングツールに [CUSTOMIZE.md](CUSTOMIZE.md) のテンプレートプロンプトを渡すことで、データ収集から設定変更までスムーズに進められます。
 
 ---
 
@@ -33,9 +42,9 @@
 4. **保育の質**: 東京都の第三者評価（福ナビ）や指導検査結果
 
 ### 解決策：「ぴったり保育園」の提供価値
-* **リアルタイム難易度シミュレーション**: 「入園時の年齢」と「家庭の持ち点（保活指数：例 40点）」を選ぶだけで、各園の直近実績に基づく受かりやすさ（入りやすい／普通／入りにくい／データなし）を即座に判定。
+* **持ち点に応じた難易度シミュレーション**: 「入園時の年齢」と「家庭の持ち点（保活指数：例 40点）」を選ぶだけで、各園の直近実績に基づく受かりやすさ（入りやすい／普通／入りにくい／データなし）の目安を判定。
 * **設備・負担の一覧比較**: 園庭、駐輪場所、ベビーカー置場、連絡アプリ、医療的ケア受入などの設備有無を黄色／グレーで統一表示（情報のない認可外園等は自動非表示）。最大3園の横並び詳細比較も可能。
-* **完全静的Webサイト（Zero Server Cost）**: データベースやサーバーサイドAPIを持たず、ブラウザ側（Vanilla JS）だけで高速動作。GitHub PagesやCloudflare Pages等の無料ホスティングで月額0円・保守フリーで運用可能。
+* **完全静的Webサイト（Zero Server Cost）**: データベースやサーバーサイドAPIを持たず、ブラウザ側（Vanilla JS）だけで高速動作。GitHub PagesやCloudflare Pages等の無料ホスティングで月額0円・サーバー運用不要・低コストで運用可能。
 
 ---
 
@@ -52,7 +61,7 @@
 │   ├── evaluations.js         # 第三者評価データ（window.EVALUATIONS_DATA）
 │   └── profile.png            # 企画・開発者アイコン
 ├── data/                      # 元データ・中間生成ファイル
-│   ├── pdf/                   # 自治体が公表したPDF原本（利用調整結果、保育園のご案内）
+│   ├── pdf/                   # 自治体が公表したPDF原本（※将来的には出典URL＋自動取得スクリプトへ移行予定）
 │   ├── admission_index_by_nursery_age.csv # 抽出した年度別指数CSV
 │   └── admission_index_consolidated.json # 統合済み指数JSON
 ├── scripts/                   # データ収集・抽出・加工用Pythonスクリプト群
@@ -62,7 +71,9 @@
 │   ├── extract_fukunavi.py    # 福ナビ（第三者評価）データの取得・抽出
 │   └── export_admission_data.py # dist向けJSファイル（window変数）の書き出し
 ├── .github/workflows/         # 自動デプロイワークフロー（GitHub Actions）
-├── LICENSE                    # MITライセンス
+├── CUSTOMIZE.md               # 自治体別カスタマイズ・横展開ガイド（AI向け指示書含む）
+├── DATA_LICENSE.md            # データ・コンテンツの利用条件・著作権規定
+├── LICENSE                    # ソースコード用MITライセンス
 ├── README.md                  # 本ドキュメント
 └── CHANGELOG.md               # 更新履歴
 ```
@@ -123,7 +134,13 @@ def norm(n):
 
 ## 5. 入園難易度の判定ロジック設計（中央区モデル）
 
-本アプリの核となる「持ち点によるリアルタイム難易度判定」は以下のロジックに基づいています：
+本アプリの「持ち点に応じた難易度判定」は以下のロジックに基づいています：
+
+> [!WARNING]
+> ### ⚠️ 「入園難易度」に関する重要な免責事項
+> * 本システムが表示する「入りやすい／普通／入りにくい」の難易度判定は、過去の公表実績をもとにした**独自ロジックによる参考情報（目安）**です。
+> * **実際の入園内定・入園可能性を保証するものではありません。**
+> * 各年度の申込者数、倍率、きょうだい加点、募集定員の変動により結果は大きく変動します。申請や園選定にあたっては、**必ず中央区（または各自治体）の最新公式案内・利用調整基準・相談窓口をご確認ください。**
 
 ```mermaid
 flowchart TD
@@ -141,6 +158,7 @@ flowchart TD
 > **自治体に応じたカスタマイズのポイント**:
 > * **点数基準の違い**: 中央区ではフルタイム共働きが「20点＋20点＝40点」ですが、自治体によっては「100点＋100点＝200点」や「10点＋10点＝20点」など全く異なります。スライダーの最小・最大値や判定の基準点を調整してください。
 > * **順位区分の有無**: 同点順位区分が公表されていない自治体の場合は、「持ち点 > 最低点 → 入りやすい」「持ち点 == 最低点 → 普通」「持ち点 < 最低点 → 入りにくい」の3区分で簡潔に判定するのが実用的です。
+> * **詳細な横展開手順**: [CUSTOMIZE.md](CUSTOMIZE.md) に必要データやAIプロンプト例をまとめています。
 
 ---
 
@@ -221,9 +239,11 @@ flowchart TD
 
 ---
 
-## 8. 企画・クレジット
-
+## 8. 企画・クレジット・ライセンス
+ 
 * **企画・データ整理**: ほづみゆうき（中央区議会議員 / Code for Chuo）
   * 中央区議会議員。元文部科学省。2児の父。中央区の子育て・行政情報を分かりやすくするWebサービスの企画・開発に取り組んでいます。[各種SNSへのリンクはこちら。](https://link.yukihoz.tokyo/)
 * **協力コミュニティ**: [Code for Chuo](https://github.com/yukihoz)
-* **ライセンス**: 本リポジトリのソースコードおよび構成は **MIT License** で公開しています。他の自治体の皆様、シビックテック、保活支援を行いたいすべての個人・団体の自由な活用・改変・再配布を歓迎します。
+* **ライセンス**:
+  * **ソースコード**: 本リポジトリのプログラムコード（HTML/CSS/JS/Python）は **[MIT License](LICENSE)** で公開しています。他の自治体の皆様、シビックテック、個人・団体の自由な活用・改変・再配布を歓迎します。
+  * **収録データ**: `data/` および `dist/data.js` 等に含まれる自治体公表データ・福ナビデータは、それぞれの提供元（東京都中央区、東京都福祉保健財団等）の利用規約・著作権規定に準拠します。詳細は **[DATA_LICENSE.md](DATA_LICENSE.md)** をご確認ください。
