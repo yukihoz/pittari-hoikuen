@@ -1951,6 +1951,16 @@ dialog h3 .material-symbols-rounded {
   font-size: 13px;
   line-height: 1.7;
 }
+.author-bio a {
+  color: var(--pink-deep);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-weight: 500;
+  margin-left: 4px;
+}
+.author-bio a:hover {
+  opacity: 0.8;
+}
 
 /* Footer */
 footer {
