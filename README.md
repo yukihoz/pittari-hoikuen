@@ -76,9 +76,9 @@
 ### ① 施設基本情報 & 設備データ
 | 項目 | 具体的な取得先ソース（中央区） | 取得方法・整理手法 |
 | :--- | :--- | :--- |
-| **認可保育所 利用案内・申込書原本** | [中央区公式HP: 認可保育所等利用案内](https://www.city.chuo.lg.jp/a0021/kosodate/kosodate/hoikuen/hoiku/ninkahoiku/ninkahoikujo.html#cms1614F)<br>原本PDF: [令和8年度保育園のごあんない (PDF)](https://www.city.chuo.lg.jp/documents/16297/r8goannnai.pdf) | 表形式のパンフレットPDFから定員・延床面積・園庭面積・職員数などを抽出。 |
+| **認可保育所 利用案内・申込書原本** | [中央区公式HP: 認可保育所等利用案内](https://www.city.chuo.lg.jp/a0021/kosodate/kosodate/hoikuen/hoiku/ninkahoiku/ninkahoikujo.html#cms1614F)<br>原本PDF: [令和9年度保育園のごあんない (PDF)](https://www.city.chuo.lg.jp/documents/16297/r9goannaizenpeeji.pdf) | 表形式のパンフレットPDFから定員・延床面積・園庭面積・職員数などを抽出。 |
 | **施設一覧・受入状況** | [中央区公式HP: 認可保育所 施設案内](https://www.city.chuo.lg.jp/kosodate/kosodate/hoikuen/hoiku/ninkahoiku/ninkahoikuensisetsuannai/index.html) | 各施設の住所、電話番号、運営事業者名、開設時期等を収集。 |
-| **設備・日々の持ち物負担** | 「令和8年度 保育園のごあんない」巻末一覧表 | おむつサブスク、使用済みおむつ処分、布団シーツ、駐輪スペース、ベビーカー置場、連絡アプリ、医療的ケア受入などの有無をデータ化。 |
+| **設備・日々の持ち物負担** | 「令和9年度 保育園のごあんない」一覧表 | おむつサブスク、使用済みおむつ処分、布団シーツ、駐輪スペース、ベビーカー置場、連絡アプリ、医療的ケア受入などの有無をデータ化。 |
 | **地域型保育事業（小規模・事業所内）** | [中央区公式HP: 地域型保育事業一覧](https://www.city.chuo.lg.jp/kosodate/hoiku/tiikigata/syoukibohoikujigyou.html) | 認可枠として選考対象となる小規模保育所・事業所内保育所の基本情報を抽出。 |
 | **認証保育所一覧** | [中央区公式HP: 認証保育所一覧](https://www.city.chuo.lg.jp/a0021/kosodate/kosodate/hoikuen/hoiku/ninnshouhoikujo/index.html) | 東京都認証保育所の基本情報・定員を収集。 |
 | **認可外・企業主導型保育事業** | [中央区公式HP: 企業主導型保育事業・認可外施設](https://www.city.chuo.lg.jp/a0021/kosodate/kosodate/hoikuen/hoiku/ninkagaihoiku/kigyou.html) | 無償化対象施設を含む認可外・企業主導型保育事業の情報を収集。 |

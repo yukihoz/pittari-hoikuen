@@ -18824,6 +18824,373 @@
   {
     "id": "licensed-64",
     "number": 59,
+    "name": "さくらさくみらい西仲通り",
+    "type": "私立認可",
+    "area": "月島",
+    "opened": "2027-04-01",
+    "ages": {
+      "57d": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "7m": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "age1": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "age2": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "age3": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "age4": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "age5": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "licensed-65",
+    "number": 60,
     "name": "月島雲母保育園",
     "type": "私立認可",
     "area": "月島",
@@ -19147,8 +19514,8 @@
     }
   },
   {
-    "id": "licensed-65",
-    "number": 60,
+    "id": "licensed-66",
+    "number": 61,
     "name": "さくらさくみらい東仲通り",
     "type": "私立認可",
     "area": "月島",
@@ -19472,8 +19839,8 @@
     }
   },
   {
-    "id": "licensed-66",
-    "number": 61,
+    "id": "licensed-67",
+    "number": 62,
     "name": "さくらさくみらい月の岬",
     "type": "私立認可",
     "area": "月島",
@@ -19797,8 +20164,8 @@
     }
   },
   {
-    "id": "licensed-67",
-    "number": 62,
+    "id": "licensed-68",
+    "number": 63,
     "name": "月島聖ルカ保育園",
     "type": "私立認可",
     "area": "月島",
@@ -20122,8 +20489,8 @@
     }
   },
   {
-    "id": "licensed-68",
-    "number": 63,
+    "id": "licensed-69",
+    "number": 64,
     "name": "勝どきちとせ保育園",
     "type": "私立認可",
     "area": "月島",
@@ -20447,8 +20814,8 @@
     }
   },
   {
-    "id": "licensed-69",
-    "number": 64,
+    "id": "licensed-70",
+    "number": 65,
     "name": "まなびの森保育園勝どき",
     "type": "私立認可",
     "area": "月島",
@@ -20772,8 +21139,8 @@
     }
   },
   {
-    "id": "licensed-70",
-    "number": 65,
+    "id": "licensed-71",
+    "number": 66,
     "name": "ほっぺるランド勝どき",
     "type": "私立認可",
     "area": "月島",
@@ -21097,8 +21464,8 @@
     }
   },
   {
-    "id": "licensed-71",
-    "number": 66,
+    "id": "licensed-72",
+    "number": 67,
     "name": "ほっぺるランド清澄通り勝どき",
     "type": "私立認可",
     "area": "月島",
@@ -21422,8 +21789,8 @@
     }
   },
   {
-    "id": "licensed-72",
-    "number": 67,
+    "id": "licensed-73",
+    "number": 68,
     "name": "さくらさくみらいパークタワー勝どき",
     "type": "私立認可",
     "area": "月島",
@@ -21733,8 +22100,8 @@
     }
   },
   {
-    "id": "licensed-73",
-    "number": 68,
+    "id": "licensed-74",
+    "number": 69,
     "name": "さくらさくみらい 勝どき",
     "type": "私立認可",
     "area": "月島",
@@ -22051,8 +22418,8 @@
     }
   },
   {
-    "id": "licensed-74",
-    "number": 69,
+    "id": "licensed-75",
+    "number": 70,
     "name": "アスク勝どき保育園",
     "type": "私立認可",
     "area": "月島",
@@ -22376,8 +22743,8 @@
     }
   },
   {
-    "id": "licensed-75",
-    "number": 70,
+    "id": "licensed-76",
+    "number": 71,
     "name": "ベネッセ勝どき保育園",
     "type": "私立認可",
     "area": "月島",
@@ -22701,8 +23068,8 @@
     }
   },
   {
-    "id": "licensed-76",
-    "number": 71,
+    "id": "licensed-77",
+    "number": 72,
     "name": "ほっぺるランド新島橋かちどき",
     "type": "私立認可",
     "area": "月島",
@@ -23026,8 +23393,8 @@
     }
   },
   {
-    "id": "licensed-77",
-    "number": 72,
+    "id": "licensed-78",
+    "number": 73,
     "name": "インターナショナル勝どきえほん保育園",
     "type": "私立認可",
     "area": "月島",
@@ -23351,8 +23718,8 @@
     }
   },
   {
-    "id": "licensed-78",
-    "number": 73,
+    "id": "licensed-79",
+    "number": 74,
     "name": "ニチイキッズさわやか 勝どき6丁目保育園",
     "type": "私立認可",
     "area": "月島",
@@ -23676,8 +24043,8 @@
     }
   },
   {
-    "id": "licensed-80",
-    "number": 74,
+    "id": "licensed-81",
+    "number": 75,
     "name": "太陽の子晴海トリトン保育園",
     "type": "私立認可",
     "area": "月島",
@@ -24001,8 +24368,8 @@
     }
   },
   {
-    "id": "licensed-81",
-    "number": 75,
+    "id": "licensed-82",
+    "number": 76,
     "name": "ピノキオ幼児舎HARUMI保育園",
     "type": "私立認可",
     "area": "月島",
@@ -24298,8 +24665,8 @@
     }
   },
   {
-    "id": "licensed-82",
-    "number": 76,
+    "id": "licensed-83",
+    "number": 77,
     "name": "ポピンズナーサリースクール晴海",
     "type": "私立認可",
     "area": "月島",
@@ -24623,8 +24990,8 @@
     }
   },
   {
-    "id": "licensed-84",
-    "number": 77,
+    "id": "licensed-85",
+    "number": 78,
     "name": "さくらさくみらい 晴海",
     "type": "私立認可",
     "area": "月島",
@@ -24948,8 +25315,8 @@
     }
   },
   {
-    "id": "licensed-85",
-    "number": 78,
+    "id": "licensed-86",
+    "number": 79,
     "name": "小学館アカデミー晴海保育園",
     "type": "私立認可",
     "area": "月島",
@@ -25273,8 +25640,8 @@
     }
   },
   {
-    "id": "licensed-87",
-    "number": 79,
+    "id": "licensed-88",
+    "number": 80,
     "name": "アスク晴海3丁目保育園",
     "type": "私立認可",
     "area": "月島",
@@ -25598,8 +25965,8 @@
     }
   },
   {
-    "id": "licensed-88",
-    "number": 80,
+    "id": "licensed-89",
+    "number": 81,
     "name": "ポピンズナーサリースクールららテラス HARUMI FLAG",
     "type": "私立認可",
     "area": "月島",
@@ -25909,8 +26276,8 @@
     }
   },
   {
-    "id": "licensed-89",
-    "number": 81,
+    "id": "licensed-90",
+    "number": 82,
     "name": "ポピンズナーサリースクールHARUMI FLAG PORT VILLAGE",
     "type": "私立認可",
     "area": "月島",
@@ -26220,8 +26587,8 @@
     }
   },
   {
-    "id": "licensed-91",
-    "number": 82,
+    "id": "licensed-92",
+    "number": 83,
     "name": "にじいろ保育園HARUMI FLAG",
     "type": "私立認可",
     "area": "月島",
@@ -26517,8 +26884,375 @@
     }
   },
   {
-    "id": "licensed-92",
-    "number": 83,
+    "id": "licensed-93",
+    "number": 84,
+    "name": "ポピンズナーサリースクール豊海",
+    "type": "私立認可",
+    "area": "月島",
+    "opened": "2027-04-01",
+    "ages": {
+      "57d": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "7m": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "age1": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "age2": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "age3": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "age4": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      },
+      "age5": {
+        "recent_available": false,
+        "is_unopened": true,
+        "years": {
+          "2022": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2023": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2024": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2025": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          },
+          "2026": {
+            "raw": "-",
+            "display": "-",
+            "score": null,
+            "rank": null,
+            "status": "unopened",
+            "status_label": "未開設",
+            "is_merged_0yo": false
+          }
+        }
+      }
+    }
+  },
+  {
+    "id": "licensed-94",
+    "number": 85,
     "name": "晴海こども園",
     "type": "こども園",
     "area": "月島",
@@ -26842,8 +27576,8 @@
     }
   },
   {
-    "id": "licensed-93",
-    "number": 84,
+    "id": "licensed-95",
+    "number": 86,
     "name": "小学館アカデミー勝どきこども園",
     "type": "こども園",
     "area": "月島",
@@ -27167,8 +27901,8 @@
     }
   },
   {
-    "id": "licensed-94",
-    "number": 85,
+    "id": "licensed-96",
+    "number": 87,
     "name": "渋谷教育学園晴海西こども園",
     "type": "こども園",
     "area": "月島",
@@ -27478,8 +28212,8 @@
     }
   },
   {
-    "id": "community-キャリー保育園八丁堀",
-    "number": null,
+    "id": "other-地域型保育-4",
+    "number": 128,
     "name": "キャリー保育園八丁堀",
     "type": "地域型保育事業(小規模)",
     "area": "京橋",
